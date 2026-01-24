@@ -592,6 +592,11 @@ export default function OnlineLibraryDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+      {/* 제목 */}
+      <div className="mb-4">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 2026 임상심리전문가 자격시험 준비 스터디룸</h1>
+      </div>
+
       {/* 헤더 - 날짜 / 구글계정 */}
       <div className="mb-4">
         <div className="flex items-center justify-between">
