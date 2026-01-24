@@ -25,6 +25,8 @@ const weeklyData = [
 ];
 
 export default function OnlineLibraryDashboard() {
+  const [user, setUser] = useState(null); // 로그인한 사용자
+  const [currentMember, setCurrentMember] = useState(null); // 현재 로그인한 멤버 정보
   const [members, setMembers] = useState([]);
   const [onlineStatus, setOnlineStatus] = useState({});
   const [activityLog, setActivityLog] = useState([]);
@@ -33,10 +35,74 @@ export default function OnlineLibraryDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [personalRecords, setPersonalRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // 인증 상태 확인
+  useEffect(() => {
+    // 현재 세션 확인
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    // 인증 상태 변경 구독
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 로그인한 사용자의 멤버 정보 로드
+  useEffect(() => {
+    if (user) {
+      loadCurrentMember();
+    }
+  }, [user]);
+
+  const loadCurrentMember = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('members')
+      .select('*')
+      .eq('email', user.email)
+      .single();
+
+    if (!error && data) {
+      setCurrentMember(data);
+    }
+  };
+
+  // Google 로그인
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) {
+      console.error('Login error:', error);
+      alert('로그인 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 로그아웃
+  const signOut = async () => {
+    // 로그아웃 전에 입실 상태면 퇴실 처리
+    if (currentMember && onlineStatus[currentMember.id]) {
+      await handleExit();
+    }
+    await supabase.auth.signOut();
+    setCurrentMember(null);
+  };
 
   // 초기 데이터 로드
   useEffect(() => {
-    loadInitialData();
+    if (!authLoading) {
+      loadInitialData();
+    }
 
     // 실시간 구독 설정
     const onlineStatusSubscription = supabase
@@ -59,7 +125,6 @@ export default function OnlineLibraryDashboard() {
         { event: 'INSERT', schema: 'public', table: 'attendance_logs' },
         async (payload) => {
           console.log('New attendance log:', payload);
-          // 새 로그에 회원 정보 추가
           const member = members.find(m => m.id === payload.new.member_id);
           if (member) {
             const newLog = {
@@ -80,7 +145,7 @@ export default function OnlineLibraryDashboard() {
       supabase.removeChannel(onlineStatusSubscription);
       supabase.removeChannel(attendanceSubscription);
     };
-  }, [members]);
+  }, [authLoading, members]);
 
   const loadInitialData = async () => {
     try {
@@ -135,17 +200,20 @@ export default function OnlineLibraryDashboard() {
     }
   };
 
-  // 입퇴실 처리
-  const handleAction = async (memberId, action) => {
-    try {
-      const isEntering = action === 'enter';
+  // 입실 처리 (도서관 입장하기 클릭 시)
+  const handleEnterLibrary = async () => {
+    if (!currentMember) {
+      alert('먼저 로그인해주세요.');
+      return;
+    }
 
-      // 1. attendance_logs에 기록 추가
+    try {
+      // 1. attendance_logs에 입실 기록 추가
       const { error: logError } = await supabase
         .from('attendance_logs')
         .insert({
-          member_id: memberId,
-          action: action
+          member_id: currentMember.id,
+          action: 'enter'
         });
 
       if (logError) throw logError;
@@ -154,37 +222,87 @@ export default function OnlineLibraryDashboard() {
       const { error: statusError } = await supabase
         .from('online_status')
         .update({
-          is_online: isEntering,
-          [isEntering ? 'last_enter' : 'last_exit']: new Date().toISOString(),
+          is_online: true,
+          last_enter: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
-        .eq('member_id', memberId);
+        .eq('member_id', currentMember.id);
 
       if (statusError) throw statusError;
 
-      // 로컬 상태 즉시 업데이트
+      // 로컬 상태 업데이트
       setOnlineStatus(prev => ({
         ...prev,
-        [memberId]: isEntering
+        [currentMember.id]: true
       }));
 
       // 활동 로그에 추가
-      const member = members.find(m => m.id === memberId);
-      if (member) {
-        const newLog = {
-          id: Date.now(),
-          member_id: memberId,
-          member_name: member.name,
-          avatar: member.avatar,
-          action: action,
-          logged_at: new Date().toISOString()
-        };
-        setActivityLog(prev => [newLog, ...prev].slice(0, 10));
-      }
+      const newLog = {
+        id: Date.now(),
+        member_id: currentMember.id,
+        member_name: currentMember.name,
+        avatar: currentMember.avatar,
+        action: 'enter',
+        logged_at: new Date().toISOString()
+      };
+      setActivityLog(prev => [newLog, ...prev].slice(0, 10));
+
+      // Google Meet 열기
+      window.open(GOOGLE_MEET_URL, '_blank');
 
     } catch (error) {
-      console.error('Error handling action:', error);
-      alert('처리 중 오류가 발생했습니다.');
+      console.error('Error entering:', error);
+      alert('입실 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 퇴실 처리
+  const handleExit = async () => {
+    if (!currentMember) return;
+
+    try {
+      // 1. attendance_logs에 퇴실 기록 추가
+      const { error: logError } = await supabase
+        .from('attendance_logs')
+        .insert({
+          member_id: currentMember.id,
+          action: 'exit'
+        });
+
+      if (logError) throw logError;
+
+      // 2. online_status 업데이트
+      const { error: statusError } = await supabase
+        .from('online_status')
+        .update({
+          is_online: false,
+          last_exit: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('member_id', currentMember.id);
+
+      if (statusError) throw statusError;
+
+      // 로컬 상태 업데이트
+      setOnlineStatus(prev => ({
+        ...prev,
+        [currentMember.id]: false
+      }));
+
+      // 활동 로그에 추가
+      const newLog = {
+        id: Date.now(),
+        member_id: currentMember.id,
+        member_name: currentMember.name,
+        avatar: currentMember.avatar,
+        action: 'exit',
+        logged_at: new Date().toISOString()
+      };
+      setActivityLog(prev => [newLog, ...prev].slice(0, 10));
+
+    } catch (error) {
+      console.error('Error exiting:', error);
+      alert('퇴실 처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -253,12 +371,47 @@ export default function OnlineLibraryDashboard() {
     : 0;
   const totalStudyHours = members.reduce((acc, m) => acc + (m.total_hours || 0), 0).toFixed(1);
 
-  if (loading) {
+  // 현재 사용자가 입실 상태인지 확인
+  const isCurrentUserOnline = currentMember && onlineStatus[currentMember.id];
+
+  // 로딩 중
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
-          <p className="mt-2 text-gray-600">데이터를 불러오는 중...</p>
+          <p className="mt-2 text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 로그인 안 된 경우
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full mx-4 text-center">
+          <h1 className="text-3xl font-bold mb-2">📚 온라인 도서관</h1>
+          <p className="text-gray-500 mb-8">실시간 입퇴실 현황 대시보드</p>
+
+          <div className="space-y-4">
+            <button
+              onClick={signInWithGoogle}
+              className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Google 계정으로 로그인
+            </button>
+          </div>
+
+          <p className="mt-6 text-sm text-gray-400">
+            스터디 멤버만 접근할 수 있습니다
+          </p>
         </div>
       </div>
     );
@@ -287,16 +440,42 @@ export default function OnlineLibraryDashboard() {
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-            {/* Google Meet 링크 */}
-            <a
-              href={GOOGLE_MEET_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-              도서관 입장하기
-            </a>
+
+            {/* 입실/퇴실 버튼 */}
+            {isCurrentUserOnline ? (
+              <button
+                onClick={handleExit}
+                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                퇴실하기
+              </button>
+            ) : (
+              <button
+                onClick={handleEnterLibrary}
+                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                도서관 입장하기
+              </button>
+            )}
+
+            {/* 사용자 프로필 & 로그아웃 */}
+            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
+              <img
+                src={user.user_metadata?.avatar_url || '/default-avatar.png'}
+                alt="프로필"
+                className="w-8 h-8 rounded-full"
+              />
+              <span className="text-sm font-medium">{user.user_metadata?.full_name || user.email}</span>
+              <button
+                onClick={signOut}
+                className="ml-2 text-gray-400 hover:text-gray-600"
+                title="로그아웃"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -373,11 +552,14 @@ export default function OnlineLibraryDashboard() {
           <div className="grid grid-cols-2 gap-3">
             {members.map(member => {
               const isOnline = onlineStatus[member.id] || false;
+              const isMe = currentMember?.id === member.id;
               return (
                 <div
                   key={member.id}
                   onClick={() => handleUserClick(member)}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                  className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors ${
+                    isMe ? 'bg-blue-50 border-2 border-blue-200' : 'bg-gray-50 hover:bg-gray-100'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -387,34 +569,16 @@ export default function OnlineLibraryDashboard() {
                       }`}></span>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{member.name}</p>
+                      <p className="font-medium text-gray-900">
+                        {member.name}
+                        {isMe && <span className="ml-2 text-xs text-blue-600">(나)</span>}
+                      </p>
                       <p className="text-xs text-gray-500">{member.total_hours || 0}h 학습</p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleAction(member.id, 'enter'); }}
-                      disabled={isOnline}
-                      className={`p-2 rounded-lg transition-colors ${
-                        isOnline
-                          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                          : 'bg-green-100 text-green-600 hover:bg-green-200'
-                      }`}
-                    >
-                      <LogIn className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleAction(member.id, 'exit'); }}
-                      disabled={!isOnline}
-                      className={`p-2 rounded-lg transition-colors ${
-                        !isOnline
-                          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                          : 'bg-red-100 text-red-600 hover:bg-red-200'
-                      }`}
-                    >
-                      <LogOut className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {isOnline && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">접속중</span>
+                  )}
                 </div>
               );
             })}
