@@ -13,6 +13,16 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Google Meet URL
 const GOOGLE_MEET_URL = 'https://meet.google.com/hti-iiby-dkc';
 
+// 허용된 멤버 목록 (화이트리스트)
+const ALLOWED_MEMBERS = {
+  'psyoonchild@gmail.com': { name: '김지윤', avatar: '🦊' },
+  'pit-a-pat@hotmail.co.kr': { name: '조하나', avatar: '🐰' },
+  'khk9440@ewhain.net': { name: '곽호경', avatar: '🐻' },
+  'youjin13ae@gmail.com': { name: '배유진', avatar: '🐱' },
+  'hipsychology@gmail.com': { name: '황해인', avatar: '🐶' },
+  'dawoon85@gmail.com': { name: '정다운', avatar: '🐼' },
+};
+
 // 주간 통계 데이터
 const weeklyData = [
   { day: '월', hours: 5.2, attendance: 7 },
@@ -70,12 +80,19 @@ export default function OnlineLibraryDashboard() {
       .eq('email', user.email)
       .single();
 
-    // 멤버가 없으면 자동 등록
+    // 멤버가 없으면 자동 등록 (허용된 멤버만)
     if (error && error.code === 'PGRST116') {
+      // 허용된 멤버인지 확인
+      const allowedMember = ALLOWED_MEMBERS[user.email];
+      if (!allowedMember) {
+        // 허용되지 않은 사용자
+        return;
+      }
+
       const newMember = {
-        name: user.user_metadata?.full_name || user.email.split('@')[0],
+        name: allowedMember.name,
         email: user.email,
-        avatar: '👤',
+        avatar: allowedMember.avatar,
         auth_id: user.id,
         attendance_rate: 0,
         total_hours: 0
@@ -455,6 +472,31 @@ export default function OnlineLibraryDashboard() {
     );
   }
 
+  // 허용되지 않은 사용자인 경우
+  if (user && !ALLOWED_MEMBERS[user.email]) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full mx-4 text-center">
+          <div className="text-6xl mb-4">🚫</div>
+          <h1 className="text-2xl font-bold mb-2 text-gray-900">접근 권한이 없습니다</h1>
+          <p className="text-gray-500 mb-6">
+            이 서비스는 등록된 스터디 멤버만 이용할 수 있습니다.
+          </p>
+          <p className="text-sm text-gray-400 mb-6">
+            로그인 계정: {user.email}
+          </p>
+          <button
+            onClick={signOut}
+            className="w-full flex items-center justify-center gap-2 bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            다른 계정으로 로그인
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* 헤더 */}
@@ -500,12 +542,8 @@ export default function OnlineLibraryDashboard() {
 
             {/* 사용자 프로필 & 로그아웃 */}
             <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
-              <img
-                src={user.user_metadata?.avatar_url || '/default-avatar.png'}
-                alt="프로필"
-                className="w-8 h-8 rounded-full"
-              />
-              <span className="text-sm font-medium">{user.user_metadata?.full_name || user.email}</span>
+              <span className="text-2xl">{ALLOWED_MEMBERS[user.email]?.avatar || '👤'}</span>
+              <span className="text-sm font-medium">{ALLOWED_MEMBERS[user.email]?.name || user.email}</span>
               <button
                 onClick={signOut}
                 className="ml-2 text-gray-400 hover:text-gray-600"
