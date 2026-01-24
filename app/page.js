@@ -63,13 +63,51 @@ export default function OnlineLibraryDashboard() {
   const loadCurrentMember = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
+    // 먼저 기존 멤버 조회
+    let { data, error } = await supabase
       .from('members')
       .select('*')
       .eq('email', user.email)
       .single();
 
-    if (!error && data) {
+    // 멤버가 없으면 자동 등록
+    if (error && error.code === 'PGRST116') {
+      const newMember = {
+        name: user.user_metadata?.full_name || user.email.split('@')[0],
+        email: user.email,
+        avatar: '👤',
+        auth_id: user.id,
+        attendance_rate: 0,
+        total_hours: 0
+      };
+
+      const { data: insertedMember, error: insertError } = await supabase
+        .from('members')
+        .insert(newMember)
+        .select()
+        .single();
+
+      if (!insertError && insertedMember) {
+        // online_status 테이블에도 추가
+        await supabase
+          .from('online_status')
+          .insert({
+            member_id: insertedMember.id,
+            is_online: false
+          });
+
+        setCurrentMember(insertedMember);
+      } else {
+        console.error('Error creating member:', insertError);
+      }
+    } else if (!error && data) {
+      // auth_id가 없으면 업데이트
+      if (!data.auth_id) {
+        await supabase
+          .from('members')
+          .update({ auth_id: user.id })
+          .eq('id', data.id);
+      }
       setCurrentMember(data);
     }
   };
