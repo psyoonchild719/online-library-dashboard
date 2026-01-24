@@ -592,92 +592,74 @@ export default function OnlineLibraryDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      {/* 헤더 */}
-      <div className="mb-6 md:mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 2026 임상심리전문가 자격시험 준비 스터디룸</h1>
-              <p className="text-gray-500 text-sm mt-1">실시간 학습 시간 현황</p>
-            </div>
-            {/* 모바일: 프로필 */}
-            <div className="flex md:hidden items-center gap-2">
-              <img
-                src={user.user_metadata?.avatar_url || '/default-avatar.png'}
-                alt="프로필"
-                className="w-8 h-8 rounded-full"
-              />
-              <button
-                onClick={signOut}
-                className="text-gray-400 hover:text-gray-600"
-                title="로그아웃"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
+      {/* 헤더 - 날짜 / 구글계정 */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between">
+          {/* 날짜 선택 */}
+          <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
+            <button onClick={() => changeDate(-1)} className="p-1 hover:bg-gray-100 rounded">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <Calendar className="w-4 h-4 text-gray-400" />
+            <span className="font-medium text-sm">
+              {selectedDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+            </span>
+            <button onClick={() => changeDate(1)} className="p-1 hover:bg-gray-100 rounded">
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
 
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-4">
-            {/* 날짜 선택 */}
-            <div className="flex items-center justify-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
-              <button onClick={() => changeDate(-1)} className="p-1 hover:bg-gray-100 rounded">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <Calendar className="w-4 h-4 text-gray-400" />
-              <span className="font-medium text-sm">
-                {selectedDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
-              </span>
-              <button onClick={() => changeDate(1)} className="p-1 hover:bg-gray-100 rounded">
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* 학습 시작/종료 버튼 */}
-            {isCurrentUserOnline ? (
-              <button
-                onClick={handleExit}
-                className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                학습 종료
-              </button>
-            ) : (
-              <div className="flex gap-2">
-                <button
-                  onClick={handleStartStudy}
-                  className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Clock className="w-4 h-4" />
-                  학습 시작
-                </button>
-                <button
-                  onClick={handleEnterLibrary}
-                  className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  도서관 입실
-                </button>
-              </div>
-            )}
-
-            {/* 데스크톱: 사용자 프로필 & 로그아웃 */}
-            <div className="hidden md:flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
-              <img
-                src={user.user_metadata?.avatar_url || '/default-avatar.png'}
-                alt="프로필"
-                className="w-8 h-8 rounded-full"
-              />
-              <span className="text-sm font-medium">{ALLOWED_MEMBERS[user.email]?.name || user.email}</span>
-              <button
-                onClick={signOut}
-                className="ml-2 text-gray-400 hover:text-gray-600"
-                title="로그아웃"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
+          {/* 사용자 프로필 & 로그아웃 */}
+          <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
+            <img
+              src={user.user_metadata?.avatar_url || '/default-avatar.png'}
+              alt="프로필"
+              className="w-8 h-8 rounded-full"
+            />
+            <span className="hidden md:inline text-sm font-medium">{ALLOWED_MEMBERS[user.email]?.name || user.email}</span>
+            <button
+              onClick={signOut}
+              className="ml-1 text-gray-400 hover:text-gray-600"
+              title="로그아웃"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
+      </div>
+
+      {/* 학습 버튼들 - 한 줄 배치 */}
+      <div className="mb-6 flex items-center gap-2">
+        {/* 학습 시작 버튼 - 학습중이 아닐 때만 표시 */}
+        {!isCurrentUserOnline && (
+          <button
+            onClick={handleStartStudy}
+            className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Clock className="w-4 h-4" />
+            학습 시작
+          </button>
+        )}
+
+        {/* 도서관 입실 버튼 - 항상 표시 */}
+        <button
+          onClick={handleEnterLibrary}
+          className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+        >
+          <ExternalLink className="w-4 h-4" />
+          도서관 입실
+        </button>
+
+        {/* 학습 종료 버튼 - 학습중일 때만 표시 */}
+        {isCurrentUserOnline && (
+          <button
+            onClick={handleExit}
+            className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            학습 종료
+          </button>
+        )}
       </div>
 
       {/* D-day 대시보드 */}
