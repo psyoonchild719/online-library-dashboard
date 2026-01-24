@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Users, Clock, Calendar, TrendingUp, LogIn, LogOut, ExternalLink, X, ChevronLeft, ChevronRight, Target, Loader2 } from 'lucide-react';
 
 // Supabase 클라이언트 설정 (환경변수 사용)
@@ -23,16 +22,6 @@ const ALLOWED_MEMBERS = {
   'dawoon85@gmail.com': { name: '정다운', avatar: '🐼' },
 };
 
-// 주간 통계 데이터
-const weeklyData = [
-  { day: '월', hours: 5.2, attendance: 7 },
-  { day: '화', hours: 6.1, attendance: 8 },
-  { day: '수', hours: 4.8, attendance: 6 },
-  { day: '목', hours: 7.3, attendance: 8 },
-  { day: '금', hours: 5.9, attendance: 7 },
-  { day: '토', hours: 3.2, attendance: 4 },
-  { day: '일', hours: 2.1, attendance: 3 },
-];
 
 export default function OnlineLibraryDashboard() {
   const [user, setUser] = useState(null); // 로그인한 사용자
@@ -698,48 +687,6 @@ export default function OnlineLibraryDashboard() {
               ))
             )}
           </div>
-        </div>
-      </div>
-
-      {/* 통계 차트 */}
-      <div className="grid grid-cols-2 gap-6 mt-6">
-        <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-lg font-semibold mb-4">📊 주간 학습시간</h2>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                formatter={(value) => [`${value}시간`, '학습시간']}
-              />
-              <Bar dataKey="hours" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-lg font-semibold mb-4">📈 주간 출석 현황</h2>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                formatter={(value) => [`${value}명`, '출석인원']}
-              />
-              <Line
-                type="monotone"
-                dataKey="attendance"
-                stroke="#10b981"
-                strokeWidth={3}
-                dot={{ fill: '#10b981', strokeWidth: 2 }}
-                activeDot={{ r: 6, fill: '#10b981' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
         </div>
       </div>
 
