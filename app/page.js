@@ -759,67 +759,6 @@ export default function OnlineLibraryDashboard() {
         </div>
       </div>
 
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-xs md:text-sm">현재 입실 멤버</p>
-              <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{onlineCount}명</p>
-            </div>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <Users className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
-            </div>
-          </div>
-          <p className="mt-2 md:mt-4 text-xs md:text-sm text-gray-400">전체 {members.length}명</p>
-        </div>
-
-        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-xs md:text-sm">평균 출석률</p>
-              <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{avgAttendance}%</p>
-            </div>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
-            </div>
-          </div>
-          <div className="mt-2 md:mt-4">
-            <div className="w-full bg-gray-200 rounded-full h-1.5 md:h-2">
-              <div className="bg-blue-600 h-1.5 md:h-2 rounded-full" style={{ width: `${avgAttendance}%` }}></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-xs md:text-sm">총 학습시간</p>
-              <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{totalStudyHours}h</p>
-            </div>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <Clock className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
-            </div>
-          </div>
-          <p className="mt-2 md:mt-4 text-xs md:text-sm text-gray-500">이번 달 누적</p>
-        </div>
-
-        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-xs md:text-sm">오늘 입실</p>
-              <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">
-                {activityLog.filter(l => l.action === 'enter').length}회
-              </p>
-            </div>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-100 rounded-full flex items-center justify-center">
-              <LogIn className="w-5 h-5 md:w-6 md:h-6 text-orange-600" />
-            </div>
-          </div>
-          <p className="mt-2 md:mt-4 text-xs md:text-sm text-gray-500">실시간 업데이트</p>
-        </div>
-      </div>
-
       {/* 메인 컨텐츠 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* 회원 목록 */}
