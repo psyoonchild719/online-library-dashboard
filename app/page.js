@@ -342,8 +342,8 @@ export default function OnlineLibraryDashboard() {
       };
       setActivityLog(prev => [newLog, ...prev].slice(0, 10));
 
-      // Google Meet 열기
-      window.open(GOOGLE_MEET_URL, '_blank');
+      // Google Meet 새 창으로 열기
+      window.open(GOOGLE_MEET_URL, '_blank', 'noopener,noreferrer');
 
     } catch (error) {
       console.error('Error entering:', error);
