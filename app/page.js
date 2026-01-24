@@ -435,7 +435,7 @@ export default function OnlineLibraryDashboard() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full mx-4 text-center">
-          <h1 className="text-3xl font-bold mb-2">📚 2026 임상심리전문가 자격시험 준비 스터디룸</h1>
+          <h1 className="text-3xl font-bold mb-2">📚 2026 임상심리전문가<br />자격시험 준비 스터디룸</h1>
           <p className="text-gray-500 mb-8">온라인 도서관 입실하기</p>
 
           <div className="space-y-4">
