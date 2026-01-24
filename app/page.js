@@ -409,6 +409,23 @@ export default function OnlineLibraryDashboard() {
     if (!currentMember) return;
 
     try {
+      // 0. 마지막 입실 시간 조회해서 학습 시간 계산
+      const { data: lastEnterLog } = await supabase
+        .from('attendance_logs')
+        .select('logged_at')
+        .eq('member_id', currentMember.id)
+        .eq('action', 'enter')
+        .order('logged_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      let studyMinutes = 0;
+      if (lastEnterLog) {
+        const enterTime = new Date(lastEnterLog.logged_at);
+        const exitTime = new Date();
+        studyMinutes = Math.round((exitTime - enterTime) / 60000);
+      }
+
       // 1. attendance_logs에 퇴실 기록 추가
       const { error: logError } = await supabase
         .from('attendance_logs')
@@ -431,11 +448,31 @@ export default function OnlineLibraryDashboard() {
 
       if (statusError) throw statusError;
 
+      // 3. members 테이블의 total_hours 업데이트
+      const newTotalHours = (currentMember.total_hours || 0) + (studyMinutes / 60);
+      const { error: memberError } = await supabase
+        .from('members')
+        .update({ total_hours: newTotalHours })
+        .eq('id', currentMember.id);
+
+      if (memberError) throw memberError;
+
       // 로컬 상태 업데이트
       setOnlineStatus(prev => ({
         ...prev,
         [currentMember.id]: false
       }));
+
+      // currentMember 업데이트
+      setCurrentMember(prev => ({
+        ...prev,
+        total_hours: newTotalHours
+      }));
+
+      // members 배열도 업데이트
+      setMembers(prev => prev.map(m =>
+        m.id === currentMember.id ? { ...m, total_hours: newTotalHours } : m
+      ));
 
       // 활동 로그에 추가
       const newLog = {
