@@ -295,7 +295,60 @@ export default function OnlineLibraryDashboard() {
     }
   };
 
-  // 입실 처리 (입실하기 클릭 시)
+  // 학습 시작 처리 (Google Meet 없이)
+  const handleStartStudy = async () => {
+    if (!currentMember) {
+      alert('먼저 로그인해주세요.');
+      return;
+    }
+
+    try {
+      // 1. attendance_logs에 입실 기록 추가
+      const { error: logError } = await supabase
+        .from('attendance_logs')
+        .insert({
+          member_id: currentMember.id,
+          action: 'enter'
+        });
+
+      if (logError) throw logError;
+
+      // 2. online_status 업데이트
+      const { error: statusError } = await supabase
+        .from('online_status')
+        .update({
+          is_online: true,
+          last_enter: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('member_id', currentMember.id);
+
+      if (statusError) throw statusError;
+
+      // 로컬 상태 업데이트
+      setOnlineStatus(prev => ({
+        ...prev,
+        [currentMember.id]: true
+      }));
+
+      // 활동 로그에 추가
+      const newLog = {
+        id: Date.now(),
+        member_id: currentMember.id,
+        member_name: currentMember.name,
+        avatar: currentMember.avatar,
+        action: 'enter',
+        logged_at: new Date().toISOString()
+      };
+      setActivityLog(prev => [newLog, ...prev].slice(0, 10));
+
+    } catch (error) {
+      console.error('Error starting study:', error);
+      alert('학습 시작 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 도서관 입실 처리 (학습 시작 + Google Meet 열기)
   const handleEnterLibrary = async () => {
     if (!currentMember) {
       alert('먼저 로그인해주세요.');
@@ -346,7 +399,7 @@ export default function OnlineLibraryDashboard() {
       window.open(GOOGLE_MEET_URL, '_blank', 'noopener,noreferrer');
 
     } catch (error) {
-      console.error('Error entering:', error);
+      console.error('Error entering library:', error);
       alert('입실 처리 중 오류가 발생했습니다.');
     }
   };
@@ -579,23 +632,32 @@ export default function OnlineLibraryDashboard() {
               </button>
             </div>
 
-            {/* 입실/퇴실 버튼 */}
+            {/* 학습 시작/종료 버튼 */}
             {isCurrentUserOnline ? (
               <button
                 onClick={handleExit}
                 className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
-                퇴실하기
+                학습 종료
               </button>
             ) : (
-              <button
-                onClick={handleEnterLibrary}
-                className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <ExternalLink className="w-4 h-4" />
-                입실하기
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleStartStudy}
+                  className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Clock className="w-4 h-4" />
+                  학습 시작
+                </button>
+                <button
+                  onClick={handleEnterLibrary}
+                  className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  도서관 입실
+                </button>
+              </div>
             )}
 
             {/* 데스크톱: 사용자 프로필 & 로그아웃 */}
