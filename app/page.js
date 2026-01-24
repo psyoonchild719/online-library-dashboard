@@ -598,7 +598,7 @@ export default function OnlineLibraryDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 2026 임상심리전문가 자격시험 준비 스터디룸</h1>
-              <p className="text-gray-500 text-sm mt-1">실시간 입퇴실 현황</p>
+              <p className="text-gray-500 text-sm mt-1">실시간 학습 시간 현황</p>
             </div>
             {/* 모바일: 프로필 */}
             <div className="flex md:hidden items-center gap-2">
