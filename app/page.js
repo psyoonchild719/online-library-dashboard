@@ -597,9 +597,9 @@ export default function OnlineLibraryDashboard() {
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 2026 임상심리전문가 자격시험 준비 스터디룸</h1>
       </div>
 
-      {/* 헤더 - 날짜 / 구글계정 */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between">
+      {/* 헤더 - 날짜 | 버튼들 | 구글계정 */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           {/* 날짜 선택 */}
           <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
             <button onClick={() => changeDate(-1)} className="p-1 hover:bg-gray-100 rounded">
@@ -612,6 +612,35 @@ export default function OnlineLibraryDashboard() {
             <button onClick={() => changeDate(1)} className="p-1 hover:bg-gray-100 rounded">
               <ChevronRight className="w-4 h-4" />
             </button>
+          </div>
+
+          {/* 학습 버튼들 */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleEnterLibrary}
+              className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+            >
+              <ExternalLink className="w-4 h-4" />
+              도서관 입실하기
+            </button>
+
+            {!isCurrentUserOnline ? (
+              <button
+                onClick={handleStartStudy}
+                className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
+                <Clock className="w-4 h-4" />
+                학습 시작
+              </button>
+            ) : (
+              <button
+                onClick={handleExit}
+                className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                학습 종료
+              </button>
+            )}
           </div>
 
           {/* 사용자 프로필 & 로그아웃 */}
@@ -631,35 +660,6 @@ export default function OnlineLibraryDashboard() {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* 학습 버튼들 - 한 줄, 가운데 정렬 */}
-      <div className="mb-6 flex justify-center gap-3">
-        <button
-          onClick={handleEnterLibrary}
-          className="flex items-center justify-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition-colors"
-        >
-          <ExternalLink className="w-4 h-4" />
-          도서관 입실하기
-        </button>
-
-        {!isCurrentUserOnline ? (
-          <button
-            onClick={handleStartStudy}
-            className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Clock className="w-4 h-4" />
-            학습 시작
-          </button>
-        ) : (
-          <button
-            onClick={handleExit}
-            className="flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            학습 종료
-          </button>
-        )}
       </div>
 
       {/* D-day 대시보드 */}
