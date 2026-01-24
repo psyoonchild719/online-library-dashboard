@@ -35,6 +35,7 @@ export default function OnlineLibraryDashboard() {
   const [personalRecords, setPersonalRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
+  const [todayStudyTime, setTodayStudyTime] = useState({}); // 오늘의 멤버별 학습시간
 
   // 인증 상태 확인
   useEffect(() => {
@@ -237,10 +238,60 @@ export default function OnlineLibraryDashboard() {
       })) || [];
       setActivityLog(formattedLogs);
 
+      // 오늘의 학습시간 계산
+      await loadTodayStudyTime();
+
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 오늘의 멤버별 학습시간 로드
+  const loadTodayStudyTime = async () => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const { data: todayLogs, error } = await supabase
+        .from('attendance_logs')
+        .select('*')
+        .gte('logged_at', today.toISOString())
+        .lt('logged_at', tomorrow.toISOString())
+        .order('logged_at', { ascending: true });
+
+      if (error) throw error;
+
+      // 멤버별로 학습시간 계산
+      const studyTimeMap = {};
+      const enterTimeMap = {};
+
+      todayLogs?.forEach(log => {
+        if (log.action === 'enter') {
+          enterTimeMap[log.member_id] = new Date(log.logged_at);
+        } else if (log.action === 'exit' && enterTimeMap[log.member_id]) {
+          const enterTime = enterTimeMap[log.member_id];
+          const exitTime = new Date(log.logged_at);
+          const minutes = Math.round((exitTime - enterTime) / 60000);
+          studyTimeMap[log.member_id] = (studyTimeMap[log.member_id] || 0) + minutes;
+          delete enterTimeMap[log.member_id];
+        }
+      });
+
+      // 현재 입실 중인 멤버는 현재 시간까지 계산
+      Object.keys(enterTimeMap).forEach(memberId => {
+        const enterTime = enterTimeMap[memberId];
+        const now = new Date();
+        const minutes = Math.round((now - enterTime) / 60000);
+        studyTimeMap[memberId] = (studyTimeMap[memberId] || 0) + minutes;
+      });
+
+      setTodayStudyTime(studyTimeMap);
+    } catch (error) {
+      console.error('Error loading today study time:', error);
     }
   };
 
@@ -779,6 +830,78 @@ export default function OnlineLibraryDashboard() {
                   </div>
                 </div>
               ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 학습 시간 현황 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-6">
+        {/* 오늘의 학습시간 */}
+        <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
+          <h2 className="text-lg font-semibold mb-4">⏱️ 오늘의 학습시간</h2>
+          <div className="space-y-3">
+            {members.length === 0 ? (
+              <p className="text-gray-400 text-center py-4">멤버가 없습니다</p>
+            ) : (
+              members
+                .map(member => ({
+                  ...member,
+                  todayMinutes: todayStudyTime[member.id] || 0
+                }))
+                .sort((a, b) => b.todayMinutes - a.todayMinutes)
+                .map((member, index) => (
+                  <div key={member.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <span className="text-lg font-bold text-gray-400 w-6">{index + 1}</span>
+                    {member.avatar?.startsWith('http') ? (
+                      <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full" />
+                    ) : (
+                      <span className="text-xl">{member.avatar}</span>
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{member.name}</p>
+                    </div>
+                    <p className="font-bold text-blue-600">
+                      {member.todayMinutes >= 60
+                        ? `${Math.floor(member.todayMinutes / 60)}h ${member.todayMinutes % 60}m`
+                        : `${member.todayMinutes}m`
+                      }
+                    </p>
+                  </div>
+                ))
+            )}
+          </div>
+        </div>
+
+        {/* 누적 학습시간 랭킹 */}
+        <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
+          <h2 className="text-lg font-semibold mb-4">🏆 누적 학습시간 랭킹</h2>
+          <div className="space-y-3">
+            {members.length === 0 ? (
+              <p className="text-gray-400 text-center py-4">멤버가 없습니다</p>
+            ) : (
+              [...members]
+                .sort((a, b) => (b.total_hours || 0) - (a.total_hours || 0))
+                .map((member, index) => (
+                  <div key={member.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <span className={`text-lg font-bold w-6 ${
+                      index === 0 ? 'text-yellow-500' :
+                      index === 1 ? 'text-gray-400' :
+                      index === 2 ? 'text-amber-600' : 'text-gray-300'
+                    }`}>
+                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                    </span>
+                    {member.avatar?.startsWith('http') ? (
+                      <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full" />
+                    ) : (
+                      <span className="text-xl">{member.avatar}</span>
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{member.name}</p>
+                    </div>
+                    <p className="font-bold text-purple-600">{member.total_hours || 0}h</p>
+                  </div>
+                ))
             )}
           </div>
         </div>
