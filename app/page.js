@@ -796,7 +796,7 @@ export default function OnlineLibraryDashboard() {
                     </div>
                   </div>
                   {isOnline && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">입실중</span>
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">학습중</span>
                   )}
                 </div>
               );
@@ -824,7 +824,7 @@ export default function OnlineLibraryDashboard() {
                       <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
                         log.action === 'enter' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
-                        {log.action === 'enter' ? '입실' : '퇴실'}
+                        {log.action === 'enter' ? '학습 시작' : '학습 종료'}
                       </span>
                     </p>
                     <p className="text-xs text-gray-400">{formatTime(log.logged_at)}</p>
