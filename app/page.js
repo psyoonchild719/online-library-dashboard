@@ -487,23 +487,41 @@ export default function OnlineLibraryDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       {/* 헤더 */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">📚 온라인 도서관</h1>
-            <p className="text-gray-500 mt-1">실시간 입퇴실 현황 대시보드</p>
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 온라인 도서관</h1>
+              <p className="text-gray-500 text-sm mt-1">실시간 입퇴실 현황</p>
+            </div>
+            {/* 모바일: 프로필 */}
+            <div className="flex md:hidden items-center gap-2">
+              <img
+                src={user.user_metadata?.avatar_url || '/default-avatar.png'}
+                alt="프로필"
+                className="w-8 h-8 rounded-full"
+              />
+              <button
+                onClick={signOut}
+                className="text-gray-400 hover:text-gray-600"
+                title="로그아웃"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-4">
             {/* 날짜 선택 */}
-            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border">
+            <div className="flex items-center justify-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
               <button onClick={() => changeDate(-1)} className="p-1 hover:bg-gray-100 rounded">
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <Calendar className="w-4 h-4 text-gray-400" />
-              <span className="font-medium">
-                {selectedDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+              <span className="font-medium text-sm">
+                {selectedDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
               </span>
               <button onClick={() => changeDate(1)} className="p-1 hover:bg-gray-100 rounded">
                 <ChevronRight className="w-4 h-4" />
@@ -514,7 +532,7 @@ export default function OnlineLibraryDashboard() {
             {isCurrentUserOnline ? (
               <button
                 onClick={handleExit}
-                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 퇴실하기
@@ -522,15 +540,15 @@ export default function OnlineLibraryDashboard() {
             ) : (
               <button
                 onClick={handleEnterLibrary}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
               >
                 <ExternalLink className="w-4 h-4" />
                 입실하기
               </button>
             )}
 
-            {/* 사용자 프로필 & 로그아웃 */}
-            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
+            {/* 데스크톱: 사용자 프로필 & 로그아웃 */}
+            <div className="hidden md:flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
               <img
                 src={user.user_metadata?.avatar_url || '/default-avatar.png'}
                 alt="프로필"
@@ -549,76 +567,152 @@ export default function OnlineLibraryDashboard() {
         </div>
       </div>
 
+      {/* D-day 대시보드 */}
+      <div className="mb-6 bg-white rounded-xl shadow-sm border p-4 md:p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Target className="w-5 h-5 text-red-500" />
+          <h2 className="text-lg font-semibold">🎯 D-day</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          {/* 임상심리전문가 필기 */}
+          {(() => {
+            const examDate = new Date('2026-02-06');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const diffTime = examDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const isToday = diffDays === 0;
+            const isPast = diffDays < 0;
+
+            return (
+              <div className={`p-4 rounded-xl border-2 ${
+                isToday ? 'bg-red-50 border-red-300' :
+                isPast ? 'bg-gray-50 border-gray-200' :
+                'bg-gradient-to-br from-orange-50 to-red-50 border-orange-200'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500">2026.02.06 (금)</p>
+                    <h3 className="font-bold text-gray-900 text-sm md:text-base">임상심리전문가 필기</h3>
+                  </div>
+                  <p className={`text-2xl md:text-3xl font-black ${
+                    isToday ? 'text-red-600' :
+                    isPast ? 'text-gray-400' :
+                    diffDays <= 7 ? 'text-red-500' :
+                    diffDays <= 14 ? 'text-orange-500' :
+                    'text-blue-600'
+                  }`}>
+                    {isToday ? 'D-Day' : isPast ? `D+${Math.abs(diffDays)}` : `D-${diffDays}`}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 임상심리전문가 면접 */}
+          {(() => {
+            const examDate = new Date('2026-02-07');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const diffTime = examDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const isToday = diffDays === 0;
+            const isPast = diffDays < 0;
+
+            return (
+              <div className={`p-4 rounded-xl border-2 ${
+                isToday ? 'bg-red-50 border-red-300' :
+                isPast ? 'bg-gray-50 border-gray-200' :
+                'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500">2026.02.07 (토)</p>
+                    <h3 className="font-bold text-gray-900 text-sm md:text-base">임상심리전문가 면접</h3>
+                  </div>
+                  <p className={`text-2xl md:text-3xl font-black ${
+                    isToday ? 'text-red-600' :
+                    isPast ? 'text-gray-400' :
+                    diffDays <= 7 ? 'text-red-500' :
+                    diffDays <= 14 ? 'text-orange-500' :
+                    'text-purple-600'
+                  }`}>
+                    {isToday ? 'D-Day' : isPast ? `D+${Math.abs(diffDays)}` : `D-${diffDays}`}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
       {/* 통계 카드 */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-500 text-sm">현재 접속자</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{onlineCount}명</p>
+              <p className="text-gray-500 text-xs md:text-sm">현재 접속자</p>
+              <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{onlineCount}명</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <Users className="w-6 h-6 text-green-600" />
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <Users className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
-            <span className="text-green-600">● 온라인</span>
-            <span className="text-gray-400 ml-2">/ 전체 {members.length}명</span>
-          </div>
+          <p className="mt-2 md:mt-4 text-xs md:text-sm text-gray-400">전체 {members.length}명</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-500 text-sm">평균 출석률</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{avgAttendance}%</p>
+              <p className="text-gray-500 text-xs md:text-sm">평균 출석률</p>
+              <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{avgAttendance}%</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-blue-600" />
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${avgAttendance}%` }}></div>
+          <div className="mt-2 md:mt-4">
+            <div className="w-full bg-gray-200 rounded-full h-1.5 md:h-2">
+              <div className="bg-blue-600 h-1.5 md:h-2 rounded-full" style={{ width: `${avgAttendance}%` }}></div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-500 text-sm">총 학습시간</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{totalStudyHours}h</p>
+              <p className="text-gray-500 text-xs md:text-sm">총 학습시간</p>
+              <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{totalStudyHours}h</p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <Clock className="w-6 h-6 text-purple-600" />
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Clock className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
             </div>
           </div>
-          <p className="mt-4 text-sm text-gray-500">이번 달 누적</p>
+          <p className="mt-2 md:mt-4 text-xs md:text-sm text-gray-500">이번 달 누적</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-500 text-sm">오늘 입실</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">
+              <p className="text-gray-500 text-xs md:text-sm">오늘 입실</p>
+              <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">
                 {activityLog.filter(l => l.action === 'enter').length}회
               </p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-              <LogIn className="w-6 h-6 text-orange-600" />
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-100 rounded-full flex items-center justify-center">
+              <LogIn className="w-5 h-5 md:w-6 md:h-6 text-orange-600" />
             </div>
           </div>
-          <p className="mt-4 text-sm text-gray-500">실시간 업데이트 중</p>
+          <p className="mt-2 md:mt-4 text-xs md:text-sm text-gray-500">실시간 업데이트</p>
         </div>
       </div>
 
       {/* 메인 컨텐츠 */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* 회원 목록 */}
-        <div className="col-span-2 bg-white rounded-xl shadow-sm border p-6">
+        <div className="md:col-span-2 bg-white rounded-xl shadow-sm border p-4 md:p-6">
           <h2 className="text-lg font-semibold mb-4">👥 회원 현황</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {members.map(member => {
               const isOnline = onlineStatus[member.id] || false;
               const isMe = currentMember?.id === member.id;
@@ -659,9 +753,9 @@ export default function OnlineLibraryDashboard() {
         </div>
 
         {/* 실시간 활동 로그 */}
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
           <h2 className="text-lg font-semibold mb-4">📋 실시간 기록</h2>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="space-y-3 max-h-64 md:max-h-96 overflow-y-auto">
             {activityLog.length === 0 ? (
               <p className="text-gray-400 text-center py-8">활동 기록이 없습니다</p>
             ) : (
@@ -687,125 +781,6 @@ export default function OnlineLibraryDashboard() {
               ))
             )}
           </div>
-        </div>
-      </div>
-
-      {/* D-day 대시보드 */}
-      <div className="mt-6 bg-white rounded-xl shadow-sm border p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Target className="w-5 h-5 text-red-500" />
-          <h2 className="text-lg font-semibold">🎯 D-day 카운트다운</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {/* 임상심리전문가 필기 */}
-          {(() => {
-            const examDate = new Date('2026-02-06');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const diffTime = examDate.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const isToday = diffDays === 0;
-            const isPast = diffDays < 0;
-
-            return (
-              <div className={`p-5 rounded-xl border-2 ${
-                isToday ? 'bg-red-50 border-red-300' :
-                isPast ? 'bg-gray-50 border-gray-200' :
-                'bg-gradient-to-br from-orange-50 to-red-50 border-orange-200'
-              }`}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">2026.02.06 (금)</p>
-                    <h3 className="font-bold text-gray-900 mt-1">임상심리전문가 필기</h3>
-                    <p className="text-xs text-gray-500 mt-1">기초 / 임상</p>
-                  </div>
-                  <div className={`text-right ${isPast ? 'opacity-50' : ''}`}>
-                    <p className={`text-3xl font-black ${
-                      isToday ? 'text-red-600' :
-                      isPast ? 'text-gray-400' :
-                      diffDays <= 7 ? 'text-red-500' :
-                      diffDays <= 14 ? 'text-orange-500' :
-                      'text-blue-600'
-                    }`}>
-                      {isToday ? 'D-Day' : isPast ? `D+${Math.abs(diffDays)}` : `D-${diffDays}`}
-                    </p>
-                    {!isPast && !isToday && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        {diffDays <= 7 ? '🔥 화이팅!' : diffDays <= 14 ? '💪 조금만 더!' : '📚 꾸준히!'}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {!isPast && (
-                  <div className="mt-3">
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
-                      <div
-                        className={`h-1.5 rounded-full transition-all ${
-                          diffDays <= 7 ? 'bg-red-500' : diffDays <= 14 ? 'bg-orange-500' : 'bg-blue-500'
-                        }`}
-                        style={{ width: `${Math.max(0, Math.min(100, (1 - diffDays / 30) * 100))}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-
-          {/* 임상심리전문가 면접 */}
-          {(() => {
-            const examDate = new Date('2026-02-07');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const diffTime = examDate.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const isToday = diffDays === 0;
-            const isPast = diffDays < 0;
-
-            return (
-              <div className={`p-5 rounded-xl border-2 ${
-                isToday ? 'bg-red-50 border-red-300' :
-                isPast ? 'bg-gray-50 border-gray-200' :
-                'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200'
-              }`}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">2026.02.07 (토)</p>
-                    <h3 className="font-bold text-gray-900 mt-1">임상심리전문가 면접</h3>
-                    <p className="text-xs text-gray-500 mt-1">구술시험</p>
-                  </div>
-                  <div className={`text-right ${isPast ? 'opacity-50' : ''}`}>
-                    <p className={`text-3xl font-black ${
-                      isToday ? 'text-red-600' :
-                      isPast ? 'text-gray-400' :
-                      diffDays <= 7 ? 'text-red-500' :
-                      diffDays <= 14 ? 'text-orange-500' :
-                      'text-purple-600'
-                    }`}>
-                      {isToday ? 'D-Day' : isPast ? `D+${Math.abs(diffDays)}` : `D-${diffDays}`}
-                    </p>
-                    {!isPast && !isToday && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        {diffDays <= 7 ? '🔥 화이팅!' : diffDays <= 14 ? '💪 조금만 더!' : '📚 꾸준히!'}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {!isPast && (
-                  <div className="mt-3">
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
-                      <div
-                        className={`h-1.5 rounded-full transition-all ${
-                          diffDays <= 7 ? 'bg-red-500' : diffDays <= 14 ? 'bg-orange-500' : 'bg-purple-500'
-                        }`}
-                        style={{ width: `${Math.max(0, Math.min(100, (1 - diffDays / 30) * 100))}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
         </div>
       </div>
 
