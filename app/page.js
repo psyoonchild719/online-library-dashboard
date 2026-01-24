@@ -255,7 +255,7 @@ export default function OnlineLibraryDashboard() {
     }
   };
 
-  // 입실 처리 (도서관 입장하기 클릭 시)
+  // 입실 처리 (입실하기 클릭 시)
   const handleEnterLibrary = async () => {
     if (!currentMember) {
       alert('먼저 로그인해주세요.');
@@ -536,7 +536,7 @@ export default function OnlineLibraryDashboard() {
                 className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
               >
                 <ExternalLink className="w-4 h-4" />
-                도서관 입장하기
+                입실하기
               </button>
             )}
 
