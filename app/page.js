@@ -542,7 +542,11 @@ export default function OnlineLibraryDashboard() {
 
             {/* 사용자 프로필 & 로그아웃 */}
             <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
-              <span className="text-2xl">{ALLOWED_MEMBERS[user.email]?.avatar || '👤'}</span>
+              <img
+                src={user.user_metadata?.avatar_url || '/default-avatar.png'}
+                alt="프로필"
+                className="w-8 h-8 rounded-full"
+              />
               <span className="text-sm font-medium">{ALLOWED_MEMBERS[user.email]?.name || user.email}</span>
               <button
                 onClick={signOut}
