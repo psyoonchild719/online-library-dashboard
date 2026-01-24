@@ -633,37 +633,33 @@ export default function OnlineLibraryDashboard() {
         </div>
       </div>
 
-      {/* 학습 버튼들 - 두 줄, 가운데 정렬 */}
-      <div className="mb-6 flex flex-col items-center gap-2">
-        {/* 1줄: 도서관 입실 버튼 */}
+      {/* 학습 버튼들 - 한 줄, 가운데 정렬 */}
+      <div className="mb-6 flex justify-center gap-3">
         <button
           onClick={handleEnterLibrary}
-          className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors text-lg"
+          className="flex items-center justify-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition-colors"
         >
-          <ExternalLink className="w-5 h-5" />
+          <ExternalLink className="w-4 h-4" />
           도서관 입실하기
         </button>
 
-        {/* 2줄: 학습 시작 / 학습 종료 */}
-        <div className="flex items-center gap-2">
-          {!isCurrentUserOnline ? (
-            <button
-              onClick={handleStartStudy}
-              className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Clock className="w-4 h-4" />
-              학습 시작
-            </button>
-          ) : (
-            <button
-              onClick={handleExit}
-              className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              학습 종료
-            </button>
-          )}
-        </div>
+        {!isCurrentUserOnline ? (
+          <button
+            onClick={handleStartStudy}
+            className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Clock className="w-4 h-4" />
+            학습 시작
+          </button>
+        ) : (
+          <button
+            onClick={handleExit}
+            className="flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            학습 종료
+          </button>
+        )}
       </div>
 
       {/* D-day 대시보드 */}
@@ -749,8 +745,8 @@ export default function OnlineLibraryDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* 회원 목록 */}
         <div className="md:col-span-2 bg-white rounded-xl shadow-sm border p-4 md:p-6">
-          <h2 className="text-lg font-semibold mb-4">👥 멤버 현황</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <h2 className="text-lg font-semibold mb-3">👥 멤버 현황</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {members.map(member => {
               const isOnline = onlineStatus[member.id] || false;
               const isMe = currentMember?.id === member.id;
@@ -758,32 +754,29 @@ export default function OnlineLibraryDashboard() {
                 <div
                   key={member.id}
                   onClick={() => handleUserClick(member)}
-                  className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors ${
+                  className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-colors ${
                     isMe ? 'bg-blue-50 border-2 border-blue-200' : 'bg-gray-50 hover:bg-gray-100'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      {member.avatar?.startsWith('http') ? (
-                        <img src={member.avatar} alt={member.name} className="w-10 h-10 rounded-full" />
-                      ) : (
-                        <span className="text-2xl">{member.avatar}</span>
-                      )}
-                      <span className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-                        isOnline ? 'bg-green-500' : 'bg-gray-300'
-                      }`}></span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {member.name}
-                        {isMe && <span className="ml-2 text-xs text-blue-600">(나)</span>}
-                      </p>
-                      <p className="text-xs text-gray-500">총 {member.total_hours || 0}h 학습</p>
-                    </div>
+                  <div className="relative flex-shrink-0">
+                    {member.avatar?.startsWith('http') ? (
+                      <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full" />
+                    ) : (
+                      <span className="text-xl">{member.avatar}</span>
+                    )}
+                    <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${
+                      isOnline ? 'bg-green-500' : 'bg-gray-300'
+                    }`}></span>
                   </div>
-                  {isOnline && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">학습중</span>
-                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-gray-900 text-sm truncate">
+                      {member.name}
+                      {isMe && <span className="ml-1 text-xs text-blue-600">(나)</span>}
+                    </p>
+                    {isOnline && (
+                      <span className="text-xs text-green-600">학습중</span>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -793,7 +786,7 @@ export default function OnlineLibraryDashboard() {
         {/* 실시간 활동 로그 */}
         <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
           <h2 className="text-lg font-semibold mb-4">📋 실시간 기록</h2>
-          <div className="space-y-3 max-h-64 md:max-h-96 overflow-y-auto">
+          <div className="space-y-3 max-h-48 overflow-y-auto">
             {activityLog.length === 0 ? (
               <p className="text-gray-400 text-center py-8">활동 기록이 없습니다</p>
             ) : (
