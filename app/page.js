@@ -922,8 +922,8 @@ export default function OnlineLibraryDashboard() {
                   <p className="text-xs text-gray-500">출석률</p>
                 </div>
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-600">{personalRecords.length}일</p>
-                  <p className="text-xs text-gray-500">최근 출석</p>
+                  <p className="text-2xl font-bold text-blue-600">{personalRecords.length}회</p>
+                  <p className="text-xs text-gray-500">최근 출석 횟수</p>
                 </div>
               </div>
 
