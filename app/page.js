@@ -571,7 +571,7 @@ export default function OnlineLibraryDashboard() {
       <div className="mb-6 bg-white rounded-xl shadow-sm border p-4 md:p-6">
         <div className="flex items-center gap-2 mb-4">
           <Target className="w-5 h-5 text-red-500" />
-          <h2 className="text-lg font-semibold">🎯 D-day</h2>
+          <h2 className="text-lg font-semibold">2026 임상심리전문가 자격시험 준비</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {/* 임상심리전문가 필기 */}
@@ -711,7 +711,7 @@ export default function OnlineLibraryDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* 회원 목록 */}
         <div className="md:col-span-2 bg-white rounded-xl shadow-sm border p-4 md:p-6">
-          <h2 className="text-lg font-semibold mb-4">👥 회원 현황</h2>
+          <h2 className="text-lg font-semibold mb-4">👥 멤버 현황</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {members.map(member => {
               const isOnline = onlineStatus[member.id] || false;
