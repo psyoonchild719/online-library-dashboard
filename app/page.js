@@ -92,7 +92,7 @@ export default function OnlineLibraryDashboard() {
       const newMember = {
         name: allowedMember.name,
         email: user.email,
-        avatar: allowedMember.avatar,
+        avatar: user.user_metadata?.avatar_url || allowedMember.avatar,
         auth_id: user.id,
         attendance_rate: 0,
         total_hours: 0
@@ -643,7 +643,11 @@ export default function OnlineLibraryDashboard() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <span className="text-2xl">{member.avatar}</span>
+                      {member.avatar?.startsWith('http') ? (
+                        <img src={member.avatar} alt={member.name} className="w-10 h-10 rounded-full" />
+                      ) : (
+                        <span className="text-2xl">{member.avatar}</span>
+                      )}
                       <span className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
                         isOnline ? 'bg-green-500' : 'bg-gray-300'
                       }`}></span>
@@ -674,7 +678,11 @@ export default function OnlineLibraryDashboard() {
             ) : (
               activityLog.map(log => (
                 <div key={log.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg animate-fadeIn">
-                  <span className="text-xl">{log.avatar}</span>
+                  {log.avatar?.startsWith('http') ? (
+                    <img src={log.avatar} alt={log.member_name} className="w-8 h-8 rounded-full" />
+                  ) : (
+                    <span className="text-xl">{log.avatar}</span>
+                  )}
                   <div className="flex-1">
                     <p className="text-sm">
                       <span className="font-medium">{log.member_name}</span>
@@ -860,7 +868,11 @@ export default function OnlineLibraryDashboard() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[80vh] overflow-hidden">
             <div className="p-6 border-b flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">{selectedUser.avatar}</span>
+                {selectedUser.avatar?.startsWith('http') ? (
+                  <img src={selectedUser.avatar} alt={selectedUser.name} className="w-12 h-12 rounded-full" />
+                ) : (
+                  <span className="text-3xl">{selectedUser.avatar}</span>
+                )}
                 <div>
                   <h3 className="font-semibold text-lg">{selectedUser.name}</h3>
                   <p className="text-sm text-gray-500">{selectedUser.email}</p>
