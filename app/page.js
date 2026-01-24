@@ -651,7 +651,7 @@ export default function OnlineLibraryDashboard() {
         <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-500 text-xs md:text-sm">현재 접속자</p>
+              <p className="text-gray-500 text-xs md:text-sm">현재 입실 멤버</p>
               <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{onlineCount}명</p>
             </div>
             <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -740,11 +740,11 @@ export default function OnlineLibraryDashboard() {
                         {member.name}
                         {isMe && <span className="ml-2 text-xs text-blue-600">(나)</span>}
                       </p>
-                      <p className="text-xs text-gray-500">{member.total_hours || 0}h 학습</p>
+                      <p className="text-xs text-gray-500">총 {member.total_hours || 0}h 학습</p>
                     </div>
                   </div>
                   {isOnline && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">접속중</span>
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">입실중</span>
                   )}
                 </div>
               );
