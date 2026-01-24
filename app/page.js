@@ -633,38 +633,37 @@ export default function OnlineLibraryDashboard() {
         </div>
       </div>
 
-      {/* 학습 버튼들 - 한 줄 배치 */}
-      <div className="mb-6 flex items-center gap-2">
-        {/* 학습 시작 버튼 - 학습중이 아닐 때만 표시 */}
-        {!isCurrentUserOnline && (
-          <button
-            onClick={handleStartStudy}
-            className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Clock className="w-4 h-4" />
-            학습 시작
-          </button>
-        )}
-
-        {/* 도서관 입실 버튼 - 항상 표시 */}
+      {/* 학습 버튼들 - 두 줄, 가운데 정렬 */}
+      <div className="mb-6 flex flex-col items-center gap-2">
+        {/* 1줄: 도서관 입실 버튼 */}
         <button
           onClick={handleEnterLibrary}
-          className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors text-lg"
         >
-          <ExternalLink className="w-4 h-4" />
-          도서관 입실
+          <ExternalLink className="w-5 h-5" />
+          도서관 입실하기
         </button>
 
-        {/* 학습 종료 버튼 - 학습중일 때만 표시 */}
-        {isCurrentUserOnline && (
-          <button
-            onClick={handleExit}
-            className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            학습 종료
-          </button>
-        )}
+        {/* 2줄: 학습 시작 / 학습 종료 */}
+        <div className="flex items-center gap-2">
+          {!isCurrentUserOnline ? (
+            <button
+              onClick={handleStartStudy}
+              className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Clock className="w-4 h-4" />
+              학습 시작
+            </button>
+          ) : (
+            <button
+              onClick={handleExit}
+              className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              학습 종료
+            </button>
+          )}
+        </div>
       </div>
 
       {/* D-day 대시보드 */}
