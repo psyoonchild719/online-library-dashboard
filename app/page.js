@@ -879,7 +879,14 @@ export default function OnlineLibraryDashboard() {
                     <div className="flex-1">
                       <p className="font-medium text-sm">{member.name}</p>
                     </div>
-                    <p className="font-bold text-purple-600">{member.total_hours || 0}h</p>
+                    <p className="font-bold text-purple-600">
+                      {(() => {
+                        const totalMinutes = Math.round((member.total_hours || 0) * 60);
+                        const hours = Math.floor(totalMinutes / 60);
+                        const minutes = totalMinutes % 60;
+                        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+                      })()}
+                    </p>
                   </div>
                 ))
             )}
