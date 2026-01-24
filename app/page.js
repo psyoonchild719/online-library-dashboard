@@ -36,6 +36,7 @@ export default function OnlineLibraryDashboard() {
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
   const [todayStudyTime, setTodayStudyTime] = useState({}); // 오늘의 멤버별 학습시간
+  const [totalStudyTimeMap, setTotalStudyTimeMap] = useState({}); // 멤버별 누적 학습시간 (분)
 
   // 인증 상태 확인
   useEffect(() => {
@@ -241,6 +242,9 @@ export default function OnlineLibraryDashboard() {
       // 오늘의 학습시간 계산
       await loadTodayStudyTime();
 
+      // 누적 학습시간 계산
+      await loadTotalStudyTime();
+
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -292,6 +296,46 @@ export default function OnlineLibraryDashboard() {
       setTodayStudyTime(studyTimeMap);
     } catch (error) {
       console.error('Error loading today study time:', error);
+    }
+  };
+
+  // 멤버별 누적 학습시간 로드
+  const loadTotalStudyTime = async () => {
+    try {
+      const { data: allLogs, error } = await supabase
+        .from('attendance_logs')
+        .select('*')
+        .order('logged_at', { ascending: true });
+
+      if (error) throw error;
+
+      // 멤버별로 누적 학습시간 계산
+      const studyTimeMap = {};
+      const enterTimeMap = {};
+
+      allLogs?.forEach(log => {
+        if (log.action === 'enter') {
+          enterTimeMap[log.member_id] = new Date(log.logged_at);
+        } else if (log.action === 'exit' && enterTimeMap[log.member_id]) {
+          const enterTime = enterTimeMap[log.member_id];
+          const exitTime = new Date(log.logged_at);
+          const minutes = Math.round((exitTime - enterTime) / 60000);
+          studyTimeMap[log.member_id] = (studyTimeMap[log.member_id] || 0) + minutes;
+          delete enterTimeMap[log.member_id];
+        }
+      });
+
+      // 현재 학습 중인 멤버는 현재 시간까지 계산
+      Object.keys(enterTimeMap).forEach(memberId => {
+        const enterTime = enterTimeMap[memberId];
+        const now = new Date();
+        const minutes = Math.round((now - enterTime) / 60000);
+        studyTimeMap[memberId] = (studyTimeMap[memberId] || 0) + minutes;
+      });
+
+      setTotalStudyTimeMap(studyTimeMap);
+    } catch (error) {
+      console.error('Error loading total study time:', error);
     }
   };
 
@@ -897,8 +941,12 @@ export default function OnlineLibraryDashboard() {
             {members.length === 0 ? (
               <p className="text-gray-400 text-center py-4">멤버가 없습니다</p>
             ) : (
-              [...members]
-                .sort((a, b) => (b.total_hours || 0) - (a.total_hours || 0))
+              members
+                .map(member => ({
+                  ...member,
+                  totalMinutes: totalStudyTimeMap[member.id] || 0
+                }))
+                .sort((a, b) => b.totalMinutes - a.totalMinutes)
                 .map((member, index) => (
                   <div key={member.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <span className={`text-lg font-bold w-6 ${
@@ -917,12 +965,10 @@ export default function OnlineLibraryDashboard() {
                       <p className="font-medium text-sm">{member.name}</p>
                     </div>
                     <p className="font-bold text-purple-600">
-                      {(() => {
-                        const totalMinutes = Math.round((member.total_hours || 0) * 60);
-                        const hours = Math.floor(totalMinutes / 60);
-                        const minutes = totalMinutes % 60;
-                        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-                      })()}
+                      {member.totalMinutes >= 60
+                        ? `${Math.floor(member.totalMinutes / 60)}h ${member.totalMinutes % 60}m`
+                        : `${member.totalMinutes}m`
+                      }
                     </p>
                   </div>
                 ))
@@ -956,14 +1002,17 @@ export default function OnlineLibraryDashboard() {
             </div>
 
             <div className="p-6">
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <p className="text-2xl font-bold text-purple-600">{selectedUser.total_hours || 0}h</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {(() => {
+                      const totalMinutes = totalStudyTimeMap[selectedUser.id] || 0;
+                      const hours = Math.floor(totalMinutes / 60);
+                      const minutes = totalMinutes % 60;
+                      return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+                    })()}
+                  </p>
                   <p className="text-xs text-gray-500">총 학습시간</p>
-                </div>
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{selectedUser.attendance_rate || 0}%</p>
-                  <p className="text-xs text-gray-500">출석률</p>
                 </div>
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
                   <p className="text-2xl font-bold text-blue-600">{personalRecords.length}회</p>
