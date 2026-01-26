@@ -872,10 +872,10 @@ export default function OnlineLibraryDashboard() {
       </div>
 
       {/* D-day 대시보드 */}
-      <div className="mb-6 bg-white rounded-xl shadow-sm border p-4 md:p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Target className="w-5 h-5 text-red-500" />
-          <h2 className="text-lg font-semibold">D-day</h2>
+      <div className="mb-6 bg-white rounded-xl shadow-sm border p-3 md:p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Target className="w-4 h-4 text-red-500" />
+          <h2 className="text-base font-semibold">D-day</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {/* 임상심리전문가 필기 */}
@@ -951,10 +951,10 @@ export default function OnlineLibraryDashboard() {
       </div>
 
       {/* 메인 컨텐츠 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-4">
         {/* 회원 목록 */}
-        <div className="md:col-span-2 bg-white rounded-xl shadow-sm border p-4 md:p-6">
-          <h2 className="text-lg font-semibold mb-3">👥 멤버 현황</h2>
+        <div className="md:col-span-2 bg-white rounded-xl shadow-sm border p-3 md:p-4">
+          <h2 className="text-base font-semibold mb-2">👥 멤버 현황</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {members.map(member => {
               const isOnline = onlineStatus[member.id] || false;
@@ -993,14 +993,14 @@ export default function OnlineLibraryDashboard() {
         </div>
 
         {/* 실시간 활동 로그 */}
-        <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
-          <h2 className="text-lg font-semibold mb-4">📋 실시간 기록</h2>
-          <div className="space-y-3 max-h-48 overflow-y-auto">
+        <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
+          <h2 className="text-base font-semibold mb-2">📋 실시간 기록</h2>
+          <div className="space-y-2 max-h-36 overflow-y-auto">
             {activityLog.length === 0 ? (
               <p className="text-gray-400 text-center py-8">활동 기록이 없습니다</p>
             ) : (
               activityLog.map(log => (
-                <div key={log.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg animate-fadeIn">
+                <div key={log.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg animate-fadeIn">
                   {log.avatar?.startsWith('http') ? (
                     <img src={log.avatar} alt={log.member_name} className="w-8 h-8 rounded-full" />
                   ) : (
@@ -1026,9 +1026,9 @@ export default function OnlineLibraryDashboard() {
 
       {/* 실시간 채팅 */}
       <div className="mt-6 bg-white rounded-xl shadow-sm border p-4 md:p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <MessageCircle className="w-5 h-5 text-blue-500" />
-          <h2 className="text-lg font-semibold">💬 응원 & 다짐</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <MessageCircle className="w-4 h-4 text-blue-500" />
+          <h2 className="text-base font-semibold">실시간 메시지</h2>
         </div>
 
         {/* 채팅 메시지 목록 */}
