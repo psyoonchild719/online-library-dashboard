@@ -934,7 +934,7 @@ export default function OnlineLibraryDashboard() {
       </div>
 
       {/* 메인 컨텐츠 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-start">
         {/* 왼쪽: 멤버 현황 + 실시간 메시지 */}
         <div className="md:col-span-2 flex flex-col gap-4">
           {/* 회원 목록 */}
@@ -978,14 +978,14 @@ export default function OnlineLibraryDashboard() {
           </div>
 
           {/* 실시간 채팅 */}
-          <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
+          <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4 flex-1 flex flex-col">
             <div className="flex items-center gap-2 mb-3">
               <MessageCircle className="w-4 h-4 text-blue-500" />
               <h2 className="text-base font-semibold">실시간 메시지</h2>
             </div>
 
             {/* 채팅 메시지 목록 */}
-            <div className="space-y-3 max-h-40 overflow-y-auto mb-4" id="chat-container">
+            <div className="space-y-3 flex-1 overflow-y-auto mb-4 min-h-24 max-h-40" id="chat-container">
               {chatMessages.length === 0 ? (
                 <p className="text-gray-400 text-center py-6">첫 번째 메시지를 남겨보세요! 💪</p>
               ) : (
@@ -1037,9 +1037,9 @@ export default function OnlineLibraryDashboard() {
         </div>
 
         {/* 오른쪽: 실시간 활동 로그 */}
-        <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4 md:self-start">
+        <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
           <h2 className="text-base font-semibold mb-2">📋 실시간 기록</h2>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2 h-80 overflow-y-auto">
             {activityLog.length === 0 ? (
               <p className="text-gray-400 text-center py-8">활동 기록이 없습니다</p>
             ) : (
