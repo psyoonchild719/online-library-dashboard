@@ -794,59 +794,55 @@ export default function OnlineLibraryDashboard() {
         </div>
       )}
 
-      {/* 제목 */}
-      <div className="mb-4">
+      {/* 제목 + 구글계정 */}
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 2026 임상심리전문가 자격시험 준비 스터디룸</h1>
+        {/* 사용자 프로필 & 로그아웃 */}
+        <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
+          <img
+            src={user.user_metadata?.avatar_url || '/default-avatar.png'}
+            alt="프로필"
+            className="w-8 h-8 rounded-full"
+          />
+          <span className="hidden md:inline text-sm font-medium">{ALLOWED_MEMBERS[user.email]?.name || user.email}</span>
+          <button
+            onClick={signOut}
+            className="ml-1 text-gray-400 hover:text-gray-600"
+            title="로그아웃"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* 헤더 - 버튼들 | 구글계정 */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          {/* 학습 버튼들 */}
-          <div className="flex items-center gap-2">
+      {/* 학습 버튼들 - 가운데 정렬 */}
+      <div className="mb-6 flex justify-center">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleEnterLibrary}
+            className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+          >
+            <ExternalLink className="w-4 h-4" />
+            도서관 입실하기
+          </button>
+
+          {!isCurrentUserOnline ? (
             <button
-              onClick={handleEnterLibrary}
-              className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+              onClick={handleStartStudy}
+              className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
             >
-              <ExternalLink className="w-4 h-4" />
-              도서관 입실하기
+              <Clock className="w-4 h-4" />
+              학습 시작
             </button>
-
-            {!isCurrentUserOnline ? (
-              <button
-                onClick={handleStartStudy}
-                className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-              >
-                <Clock className="w-4 h-4" />
-                학습 시작
-              </button>
-            ) : (
-              <button
-                onClick={handleExit}
-                className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
-              >
-                <LogOut className="w-4 h-4" />
-                학습 종료
-              </button>
-            )}
-          </div>
-
-          {/* 사용자 프로필 & 로그아웃 */}
-          <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
-            <img
-              src={user.user_metadata?.avatar_url || '/default-avatar.png'}
-              alt="프로필"
-              className="w-8 h-8 rounded-full"
-            />
-            <span className="hidden md:inline text-sm font-medium">{ALLOWED_MEMBERS[user.email]?.name || user.email}</span>
+          ) : (
             <button
-              onClick={signOut}
-              className="ml-1 text-gray-400 hover:text-gray-600"
-              title="로그아웃"
+              onClick={handleExit}
+              className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
             >
               <LogOut className="w-4 h-4" />
+              학습 종료
             </button>
-          </div>
+          )}
         </div>
       </div>
 
@@ -938,10 +934,12 @@ export default function OnlineLibraryDashboard() {
       </div>
 
       {/* 메인 컨텐츠 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-4">
-        {/* 회원 목록 */}
-        <div className="md:col-span-2 bg-white rounded-xl shadow-sm border p-3 md:p-4">
-          <h2 className="text-base font-semibold mb-2">👥 멤버 현황</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 왼쪽: 멤버 현황 + 실시간 메시지 */}
+        <div className="md:col-span-2 space-y-4">
+          {/* 회원 목록 */}
+          <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
+            <h2 className="text-base font-semibold mb-2">👥 멤버 현황</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {members.map(member => {
               const isOnline = onlineStatus[member.id] || false;
@@ -977,12 +975,71 @@ export default function OnlineLibraryDashboard() {
               );
             })}
           </div>
+          </div>
+
+          {/* 실시간 채팅 */}
+          <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <MessageCircle className="w-4 h-4 text-blue-500" />
+              <h2 className="text-base font-semibold">실시간 메시지</h2>
+            </div>
+
+            {/* 채팅 메시지 목록 */}
+            <div className="space-y-3 max-h-48 overflow-y-auto mb-4" id="chat-container">
+              {chatMessages.length === 0 ? (
+                <p className="text-gray-400 text-center py-6">첫 번째 메시지를 남겨보세요! 💪</p>
+              ) : (
+                chatMessages.map(msg => {
+                  const isMe = currentMember?.id === msg.member_id;
+                  return (
+                    <div key={msg.id} className={`flex items-start gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
+                      {msg.avatar?.startsWith('http') ? (
+                        <img src={msg.avatar} alt={msg.member_name} className="w-8 h-8 rounded-full flex-shrink-0" />
+                      ) : (
+                        <span className="text-xl flex-shrink-0">{msg.avatar}</span>
+                      )}
+                      <div className={`max-w-[70%] ${isMe ? 'text-right' : ''}`}>
+                        <p className="text-xs text-gray-500 mb-1">{msg.member_name}</p>
+                        <div className={`inline-block px-3 py-2 rounded-lg ${
+                          isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          <p className="text-sm">{msg.message}</p>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* 메시지 입력 */}
+            <form onSubmit={sendChatMessage} className="flex gap-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="메시지를 입력하세요!"
+                className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                maxLength={200}
+              />
+              <button
+                type="submit"
+                disabled={!newMessage.trim()}
+                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
         </div>
 
-        {/* 실시간 활동 로그 */}
+        {/* 오른쪽: 실시간 활동 로그 */}
         <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
           <h2 className="text-base font-semibold mb-2">📋 실시간 기록</h2>
-          <div className="space-y-2 max-h-36 overflow-y-auto">
+          <div className="space-y-2 max-h-96 overflow-y-auto">
             {activityLog.length === 0 ? (
               <p className="text-gray-400 text-center py-8">활동 기록이 없습니다</p>
             ) : (
@@ -1009,64 +1066,6 @@ export default function OnlineLibraryDashboard() {
             )}
           </div>
         </div>
-      </div>
-
-      {/* 실시간 채팅 */}
-      <div className="mt-6 bg-white rounded-xl shadow-sm border p-4 md:p-6">
-        <div className="flex items-center gap-2 mb-3">
-          <MessageCircle className="w-4 h-4 text-blue-500" />
-          <h2 className="text-base font-semibold">실시간 메시지</h2>
-        </div>
-
-        {/* 채팅 메시지 목록 */}
-        <div className="space-y-3 max-h-64 overflow-y-auto mb-4" id="chat-container">
-          {chatMessages.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">첫 번째 메시지를 남겨보세요! 💪</p>
-          ) : (
-            chatMessages.map(msg => {
-              const isMe = currentMember?.id === msg.member_id;
-              return (
-                <div key={msg.id} className={`flex items-start gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
-                  {msg.avatar?.startsWith('http') ? (
-                    <img src={msg.avatar} alt={msg.member_name} className="w-8 h-8 rounded-full flex-shrink-0" />
-                  ) : (
-                    <span className="text-xl flex-shrink-0">{msg.avatar}</span>
-                  )}
-                  <div className={`max-w-[70%] ${isMe ? 'text-right' : ''}`}>
-                    <p className="text-xs text-gray-500 mb-1">{msg.member_name}</p>
-                    <div className={`inline-block px-3 py-2 rounded-lg ${
-                      isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      <p className="text-sm">{msg.message}</p>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* 메시지 입력 */}
-        <form onSubmit={sendChatMessage} className="flex gap-2">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="메시지를 입력하세요!"
-            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            maxLength={200}
-          />
-          <button
-            type="submit"
-            disabled={!newMessage.trim()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
       </div>
 
       {/* 학습 시간 현황 */}
