@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Users, Clock, Calendar, TrendingUp, LogIn, LogOut, ExternalLink, X, Target, Loader2, Send, MessageCircle } from 'lucide-react';
+import { Users, Clock, Calendar, TrendingUp, LogIn, LogOut, ExternalLink, X, Target, Loader2 } from 'lucide-react';
 
 // Supabase 클라이언트 설정 (환경변수 사용)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -37,8 +37,6 @@ export default function OnlineLibraryDashboard() {
   const [todayStudyTime, setTodayStudyTime] = useState({}); // 오늘의 멤버별 학습시간
   const [totalStudyTimeMap, setTotalStudyTimeMap] = useState({}); // 멤버별 누적 학습시간 (분)
   const [notificationPermission, setNotificationPermission] = useState('default');
-  const [chatMessages, setChatMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
 
   // 알림 권한 요청
   useEffect(() => {
@@ -229,37 +227,9 @@ export default function OnlineLibraryDashboard() {
       )
       .subscribe();
 
-    // 채팅 메시지 실시간 구독
-    const chatSubscription = supabase
-      .channel('chat_changes')
-      .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'chat_messages' },
-        async (payload) => {
-          const member = members.find(m => m.id === payload.new.member_id);
-          if (member) {
-            const newChat = {
-              id: payload.new.id,
-              member_id: payload.new.member_id,
-              member_name: member.name,
-              avatar: member.avatar,
-              message: payload.new.message,
-              created_at: payload.new.created_at
-            };
-            setChatMessages(prev => [...prev, newChat].slice(-50));
-
-            // 다른 멤버의 메시지 알림
-            if (currentMember && member.id !== currentMember.id) {
-              sendNotification('💬 새 메시지', `${member.name}: ${payload.new.message}`);
-            }
-          }
-        }
-      )
-      .subscribe();
-
     return () => {
       supabase.removeChannel(onlineStatusSubscription);
       supabase.removeChannel(attendanceSubscription);
-      supabase.removeChannel(chatSubscription);
     };
   }, [authLoading, members]);
 
@@ -314,9 +284,6 @@ export default function OnlineLibraryDashboard() {
 
       // 누적 학습시간 계산
       await loadTotalStudyTime();
-
-      // 채팅 메시지 로드
-      await loadChatMessages();
 
     } catch (error) {
       console.error('Error loading data:', error);
@@ -409,55 +376,6 @@ export default function OnlineLibraryDashboard() {
       setTotalStudyTimeMap(studyTimeMap);
     } catch (error) {
       console.error('Error loading total study time:', error);
-    }
-  };
-
-  // 채팅 메시지 로드
-  const loadChatMessages = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select(`
-          *,
-          members (name, avatar)
-        `)
-        .order('created_at', { ascending: true })
-        .limit(50);
-
-      if (error) throw error;
-
-      const formattedMessages = data?.map(msg => ({
-        id: msg.id,
-        member_id: msg.member_id,
-        member_name: msg.members?.name,
-        avatar: msg.members?.avatar,
-        message: msg.message,
-        created_at: msg.created_at
-      })) || [];
-      setChatMessages(formattedMessages);
-    } catch (error) {
-      console.error('Error loading chat messages:', error);
-    }
-  };
-
-  // 채팅 메시지 전송
-  const sendChatMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !currentMember) return;
-
-    try {
-      const { error } = await supabase
-        .from('chat_messages')
-        .insert({
-          member_id: currentMember.id,
-          message: newMessage.trim()
-        });
-
-      if (error) throw error;
-      setNewMessage('');
-    } catch (error) {
-      console.error('Error sending message:', error);
-      alert('메시지 전송에 실패했습니다.');
     }
   };
 
@@ -1013,64 +931,6 @@ export default function OnlineLibraryDashboard() {
             )}
           </div>
         </div>
-      </div>
-
-      {/* 실시간 채팅 */}
-      <div className="mt-4 bg-white rounded-xl shadow-sm border p-3 md:p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <MessageCircle className="w-4 h-4 text-blue-500" />
-          <h2 className="text-base font-semibold">실시간 메시지</h2>
-        </div>
-
-        {/* 채팅 메시지 목록 */}
-        <div className="space-y-3 max-h-40 overflow-y-auto mb-4" id="chat-container">
-          {chatMessages.length === 0 ? (
-            <p className="text-gray-400 text-center py-6">첫 번째 메시지를 남겨보세요! 💪</p>
-          ) : (
-            chatMessages.map(msg => {
-              const isMe = currentMember?.id === msg.member_id;
-              return (
-                <div key={msg.id} className={`flex items-start gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
-                  {msg.avatar?.startsWith('http') ? (
-                    <img src={msg.avatar} alt={msg.member_name} className="w-8 h-8 rounded-full flex-shrink-0" />
-                  ) : (
-                    <span className="text-xl flex-shrink-0">{msg.avatar}</span>
-                  )}
-                  <div className={`max-w-[70%] ${isMe ? 'text-right' : ''}`}>
-                    <p className="text-xs text-gray-500 mb-1">{msg.member_name}</p>
-                    <div className={`inline-block px-3 py-2 rounded-lg ${
-                      isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      <p className="text-sm">{msg.message}</p>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* 메시지 입력 */}
-        <form onSubmit={sendChatMessage} className="flex gap-2">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="메시지를 입력하세요!"
-            className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            maxLength={200}
-          />
-          <button
-            type="submit"
-            disabled={!newMessage.trim()}
-            className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
       </div>
 
       {/* 학습 시간 현황 */}
