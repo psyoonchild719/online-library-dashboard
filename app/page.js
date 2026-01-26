@@ -1039,7 +1039,7 @@ export default function OnlineLibraryDashboard() {
         {/* 오른쪽: 실시간 활동 로그 */}
         <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
           <h2 className="text-base font-semibold mb-2">📋 실시간 기록</h2>
-          <div className="space-y-2 h-80 overflow-y-auto">
+          <div className="space-y-2 max-h-32 overflow-y-auto">
             {activityLog.length === 0 ? (
               <p className="text-gray-400 text-center py-8">활동 기록이 없습니다</p>
             ) : (
