@@ -57,12 +57,20 @@ export default function OnlineLibraryDashboard() {
 
   // 알림 보내기 함수
   const sendNotification = (title, body) => {
-    if (notificationPermission === 'granted') {
-      new Notification(title, {
-        body,
-        icon: '📚',
-        tag: 'study-room-notification'
-      });
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification(title, {
+          body,
+          icon: '/apple-touch-icon.png',
+          tag: 'study-room-notification',
+          requireInteraction: false
+        });
+        console.log('알림 전송:', title, body);
+      } catch (e) {
+        console.error('알림 전송 실패:', e);
+      }
+    } else {
+      console.log('알림 권한 없음:', Notification.permission);
     }
   };
 
