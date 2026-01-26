@@ -933,13 +933,11 @@ export default function OnlineLibraryDashboard() {
         </div>
       </div>
 
-      {/* 메인 컨텐츠 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-start">
-        {/* 왼쪽: 멤버 현황 + 실시간 메시지 */}
-        <div className="md:col-span-2 flex flex-col gap-4">
-          {/* 회원 목록 */}
-          <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
-            <h2 className="text-base font-semibold mb-2">👥 멤버 현황</h2>
+      {/* 멤버 현황 + 실시간 기록 (같은 줄) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 왼쪽: 멤버 현황 */}
+        <div className="md:col-span-2 bg-white rounded-xl shadow-sm border p-3 md:p-4">
+          <h2 className="text-base font-semibold mb-2">👥 멤버 현황</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {members.map(member => {
               const isOnline = onlineStatus[member.id] || false;
@@ -975,71 +973,12 @@ export default function OnlineLibraryDashboard() {
               );
             })}
           </div>
-          </div>
-
-          {/* 실시간 채팅 */}
-          <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4 flex-1 flex flex-col">
-            <div className="flex items-center gap-2 mb-3">
-              <MessageCircle className="w-4 h-4 text-blue-500" />
-              <h2 className="text-base font-semibold">실시간 메시지</h2>
-            </div>
-
-            {/* 채팅 메시지 목록 */}
-            <div className="space-y-3 flex-1 overflow-y-auto mb-4 min-h-24 max-h-40" id="chat-container">
-              {chatMessages.length === 0 ? (
-                <p className="text-gray-400 text-center py-6">첫 번째 메시지를 남겨보세요! 💪</p>
-              ) : (
-                chatMessages.map(msg => {
-                  const isMe = currentMember?.id === msg.member_id;
-                  return (
-                    <div key={msg.id} className={`flex items-start gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
-                      {msg.avatar?.startsWith('http') ? (
-                        <img src={msg.avatar} alt={msg.member_name} className="w-8 h-8 rounded-full flex-shrink-0" />
-                      ) : (
-                        <span className="text-xl flex-shrink-0">{msg.avatar}</span>
-                      )}
-                      <div className={`max-w-[70%] ${isMe ? 'text-right' : ''}`}>
-                        <p className="text-xs text-gray-500 mb-1">{msg.member_name}</p>
-                        <div className={`inline-block px-3 py-2 rounded-lg ${
-                          isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          <p className="text-sm">{msg.message}</p>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {/* 메시지 입력 */}
-            <form onSubmit={sendChatMessage} className="flex gap-2">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="메시지를 입력하세요!"
-                className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                maxLength={200}
-              />
-              <button
-                type="submit"
-                disabled={!newMessage.trim()}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </form>
-          </div>
         </div>
 
         {/* 오른쪽: 실시간 활동 로그 */}
         <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
           <h2 className="text-base font-semibold mb-2">📋 실시간 기록</h2>
-          <div className="space-y-2 max-h-32 overflow-y-auto">
+          <div className="space-y-2 max-h-36 overflow-y-auto">
             {activityLog.length === 0 ? (
               <p className="text-gray-400 text-center py-8">활동 기록이 없습니다</p>
             ) : (
@@ -1066,6 +1005,64 @@ export default function OnlineLibraryDashboard() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* 실시간 채팅 */}
+      <div className="mt-4 bg-white rounded-xl shadow-sm border p-3 md:p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <MessageCircle className="w-4 h-4 text-blue-500" />
+          <h2 className="text-base font-semibold">실시간 메시지</h2>
+        </div>
+
+        {/* 채팅 메시지 목록 */}
+        <div className="space-y-3 max-h-40 overflow-y-auto mb-4" id="chat-container">
+          {chatMessages.length === 0 ? (
+            <p className="text-gray-400 text-center py-6">첫 번째 메시지를 남겨보세요! 💪</p>
+          ) : (
+            chatMessages.map(msg => {
+              const isMe = currentMember?.id === msg.member_id;
+              return (
+                <div key={msg.id} className={`flex items-start gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
+                  {msg.avatar?.startsWith('http') ? (
+                    <img src={msg.avatar} alt={msg.member_name} className="w-8 h-8 rounded-full flex-shrink-0" />
+                  ) : (
+                    <span className="text-xl flex-shrink-0">{msg.avatar}</span>
+                  )}
+                  <div className={`max-w-[70%] ${isMe ? 'text-right' : ''}`}>
+                    <p className="text-xs text-gray-500 mb-1">{msg.member_name}</p>
+                    <div className={`inline-block px-3 py-2 rounded-lg ${
+                      isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      <p className="text-sm">{msg.message}</p>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* 메시지 입력 */}
+        <form onSubmit={sendChatMessage} className="flex gap-2">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="메시지를 입력하세요!"
+            className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            maxLength={200}
+          />
+          <button
+            type="submit"
+            disabled={!newMessage.trim()}
+            className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </form>
       </div>
 
       {/* 학습 시간 현황 */}
