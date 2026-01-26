@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Users, Clock, Calendar, TrendingUp, LogIn, LogOut, ExternalLink, X, ChevronLeft, ChevronRight, Target, Loader2, Send, MessageCircle } from 'lucide-react';
+import { Users, Clock, Calendar, TrendingUp, LogIn, LogOut, ExternalLink, X, Target, Loader2, Send, MessageCircle } from 'lucide-react';
 
 // Supabase 클라이언트 설정 (환경변수 사용)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -30,7 +30,6 @@ export default function OnlineLibraryDashboard() {
   const [onlineStatus, setOnlineStatus] = useState({});
   const [activityLog, setActivityLog] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [personalRecords, setPersonalRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -694,12 +693,6 @@ export default function OnlineLibraryDashboard() {
     setShowModal(true);
   };
 
-  const changeDate = (days) => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + days);
-    setSelectedDate(newDate);
-  };
-
   const formatTime = (isoString) => {
     return new Date(isoString).toLocaleTimeString('ko-KR', {
       hour: '2-digit',
@@ -806,23 +799,9 @@ export default function OnlineLibraryDashboard() {
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 2026 임상심리전문가 자격시험 준비 스터디룸</h1>
       </div>
 
-      {/* 헤더 - 날짜 | 버튼들 | 구글계정 */}
+      {/* 헤더 - 버튼들 | 구글계정 */}
       <div className="mb-6">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          {/* 날짜 선택 */}
-          <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
-            <button onClick={() => changeDate(-1)} className="p-1 hover:bg-gray-100 rounded">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <span className="font-medium text-sm">
-              {selectedDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
-            </span>
-            <button onClick={() => changeDate(1)} className="p-1 hover:bg-gray-100 rounded">
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
           {/* 학습 버튼들 */}
           <div className="flex items-center gap-2">
             <button
@@ -873,9 +852,17 @@ export default function OnlineLibraryDashboard() {
 
       {/* D-day 대시보드 */}
       <div className="mb-6 bg-white rounded-xl shadow-sm border p-3 md:p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Target className="w-4 h-4 text-red-500" />
-          <h2 className="text-base font-semibold">D-day</h2>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 text-red-500" />
+            <h2 className="text-base font-semibold">D-day</h2>
+          </div>
+          <div className="flex items-center gap-2 text-gray-600">
+            <Calendar className="w-4 h-4" />
+            <span className="text-sm font-medium">
+              {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
+            </span>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {/* 임상심리전문가 필기 */}
