@@ -796,7 +796,7 @@ export default function OnlineLibraryDashboard() {
 
       {/* 제목 + 구글계정 */}
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 2026 스터디룸</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 2026 임상심리전문가 자격시험 준비 스터디룸</h1>
         {/* 사용자 프로필 & 로그아웃 */}
         <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border">
           <img
