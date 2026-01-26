@@ -1068,7 +1068,7 @@ export default function OnlineLibraryDashboard() {
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="응원 메시지를 입력하세요..."
+            placeholder="메시지를 입력하세요!"
             className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             maxLength={200}
           />
