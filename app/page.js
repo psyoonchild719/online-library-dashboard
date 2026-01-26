@@ -36,41 +36,6 @@ export default function OnlineLibraryDashboard() {
   const [authLoading, setAuthLoading] = useState(true);
   const [todayStudyTime, setTodayStudyTime] = useState({}); // 오늘의 멤버별 학습시간
   const [totalStudyTimeMap, setTotalStudyTimeMap] = useState({}); // 멤버별 누적 학습시간 (분)
-  const [notificationPermission, setNotificationPermission] = useState('default');
-
-  // 알림 권한 요청
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setNotificationPermission(Notification.permission);
-    }
-  }, []);
-
-  // 알림 권한 요청 함수
-  const requestNotificationPermission = async () => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      const permission = await Notification.requestPermission();
-      setNotificationPermission(permission);
-    }
-  };
-
-  // 알림 보내기 함수
-  const sendNotification = (title, body) => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      try {
-        new Notification(title, {
-          body,
-          icon: '/apple-touch-icon.png',
-          tag: 'study-room-notification',
-          requireInteraction: false
-        });
-        console.log('알림 전송:', title, body);
-      } catch (e) {
-        console.error('알림 전송 실패:', e);
-      }
-    } else {
-      console.log('알림 권한 없음:', Notification.permission);
-    }
-  };
 
   // 인증 상태 확인
   useEffect(() => {
@@ -216,12 +181,6 @@ export default function OnlineLibraryDashboard() {
               logged_at: payload.new.logged_at
             };
             setActivityLog(prev => [newLog, ...prev].slice(0, 10));
-
-            // 다른 멤버의 입실/퇴실 시 알림 보내기
-            if (currentMember && member.id !== currentMember.id) {
-              const actionText = payload.new.action === 'enter' ? '학습을 시작했습니다' : '학습을 종료했습니다';
-              sendNotification('📚 스터디룸 알림', `${member.name}님이 ${actionText}`);
-            }
           }
         }
       )
@@ -707,19 +666,6 @@ export default function OnlineLibraryDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      {/* 알림 권한 요청 배너 */}
-      {notificationPermission === 'default' && (
-        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
-          <span className="text-sm text-blue-700">🔔 다른 멤버의 입실/퇴실 알림을 받으시겠어요?</span>
-          <button
-            onClick={requestNotificationPermission}
-            className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-          >
-            알림 허용
-          </button>
-        </div>
-      )}
-
       {/* 제목 + 구글계정 */}
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">📚 2026 스터디룸</h1>
