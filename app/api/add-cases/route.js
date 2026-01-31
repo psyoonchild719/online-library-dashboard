@@ -196,6 +196,19 @@ export async function GET(request) {
   }
 
   try {
+    // 이미 삽입된 사례 삭제 (재실행 시 중복 방지)
+    const titlesToDelete = newPredictedCases.map(c => c.title);
+    const { data: existingCases } = await supabase
+      .from('interview_cases')
+      .select('id')
+      .in('title', titlesToDelete);
+
+    if (existingCases && existingCases.length > 0) {
+      const caseIds = existingCases.map(c => c.id);
+      await supabase.from('interview_questions').delete().in('case_id', caseIds);
+      await supabase.from('interview_cases').delete().in('id', caseIds);
+    }
+
     let insertedCases = 0;
     let insertedQuestions = 0;
 
