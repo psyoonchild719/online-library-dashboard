@@ -585,8 +585,13 @@ export default function InterviewSimulator() {
                   </div>
                   <h2 className="text-lg font-bold text-gray-800">{currentCase.title}</h2>
                   {currentCase.diagnosis && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      <span className="font-medium text-gray-600">진단:</span> {currentCase.diagnosis}
+                    <p className="text-sm mt-1">
+                      <span className="font-medium text-gray-600">진단:</span>{' '}
+                      {showAnswer ? (
+                        <span className="text-gray-500">{currentCase.diagnosis}</span>
+                      ) : (
+                        <span className="text-gray-400 italic">답안 확인 후 공개</span>
+                      )}
                     </p>
                   )}
                   {currentCase.topic && (
