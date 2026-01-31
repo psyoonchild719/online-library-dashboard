@@ -560,7 +560,7 @@ export default function InterviewSimulator() {
                         🔮 예상
                       </span>
                     )}
-                    {currentCase.years?.map(year => (
+                    {currentCase.years?.filter(y => y !== '예상').map(year => (
                       <span key={year} className="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded-full">
                         {year}
                       </span>
