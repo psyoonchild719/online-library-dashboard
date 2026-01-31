@@ -142,7 +142,7 @@ export default function InterviewSimulator() {
     const categories = [...new Set(currentCases.map(c => c.category))];
     // 정렬 순서 유지
     const order = ['강박/정신증', '우울/불안', '외상/스트레스', '성격장애', '신경발달',
-                   '신체증상', '감별진단', '섭식장애', '해리장애', '물질관련', '신경인지', '충동조절'];
+                   '신체증상', '꾀병', '섭식장애', '해리장애', '물질관련', '신경인지', '충동조절'];
     categories.sort((a, b) => order.indexOf(a) - order.indexOf(b));
     return ['전체', ...categories];
   })();
