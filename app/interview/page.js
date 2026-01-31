@@ -209,12 +209,20 @@ export default function InterviewSimulator() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-400">
-              {ALLOWED_MEMBERS[user.email]?.avatar} {ALLOWED_MEMBERS[user.email]?.name}
-            </span>
+            <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+              <img
+                src={user.user_metadata?.avatar_url || '/default-avatar.png'}
+                alt="프로필"
+                className="w-6 h-6 rounded-full"
+              />
+              <span className="text-sm text-gray-300 font-medium">
+                {ALLOWED_MEMBERS[user.email]?.name}
+              </span>
+            </div>
             <button
               onClick={signOut}
               className="text-gray-400 hover:text-white transition"
+              title="로그아웃"
             >
               <LogOut className="w-5 h-5" />
             </button>
