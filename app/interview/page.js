@@ -407,7 +407,7 @@ export default function InterviewSimulator() {
             }`}
           >
             <Scale className="w-5 h-5" />
-            윤리 ({useDatabase ? dbCases.ethics.length : ethicsCases.length})
+            윤리 ({useDatabase && dbCases.ethics.length > 0 ? dbCases.ethics.length : ethicsCases.length})
           </button>
         </div>
 
