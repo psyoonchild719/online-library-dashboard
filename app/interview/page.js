@@ -49,6 +49,8 @@ export default function InterviewSimulator() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [sourceFilter, setSourceFilter] = useState('exam'); // 'exam' | 'predicted' | 'all'
   const [practiceCount, setPracticeCount] = useState(0);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [checkedPoints, setCheckedPoints] = useState([]);
 
   // DB에서 사례 로드
   const loadCasesFromDB = useCallback(async () => {
@@ -261,13 +263,19 @@ export default function InterviewSimulator() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const resetAnswerState = () => {
+    setShowAnswer(false);
+    setUserAnswer('');
+    setCheckedPoints([]);
+  };
+
   const nextCase = () => {
     if (timer > 30) logPractice();
 
     if (currentCaseIndex < filteredCases.length - 1) {
       setCurrentCaseIndex(prev => prev + 1);
       setCurrentQuestionIndex(0);
-      setShowAnswer(false);
+      resetAnswerState();
       setTimer(0);
     }
   };
@@ -276,7 +284,7 @@ export default function InterviewSimulator() {
     if (currentCaseIndex > 0) {
       setCurrentCaseIndex(prev => prev - 1);
       setCurrentQuestionIndex(0);
-      setShowAnswer(false);
+      resetAnswerState();
       setTimer(0);
     }
   };
@@ -284,15 +292,21 @@ export default function InterviewSimulator() {
   const nextQuestion = () => {
     if (currentQuestion && currentQuestionIndex < currentCase.questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
-      setShowAnswer(false);
+      resetAnswerState();
     }
   };
 
   const prevQuestion = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
-      setShowAnswer(false);
+      resetAnswerState();
     }
+  };
+
+  const toggleCheckPoint = (idx) => {
+    setCheckedPoints(prev =>
+      prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+    );
   };
 
   const randomCase = () => {
@@ -624,30 +638,67 @@ export default function InterviewSimulator() {
                   </div>
                 </div>
 
-                <p className="text-gray-800 text-lg font-medium mb-5 leading-relaxed">{currentQuestion.q}</p>
+                <p className="text-gray-800 text-lg font-medium mb-4 leading-relaxed">{currentQuestion.q}</p>
+
+                {/* 답안 작성 영역 */}
+                <div className="mb-4">
+                  <textarea
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    placeholder="여기에 답안을 작성하세요..."
+                    className="w-full h-32 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 text-gray-700 placeholder-gray-400"
+                  />
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-xs text-gray-400">{userAnswer.length}자</span>
+                    {userAnswer.length > 0 && !showAnswer && (
+                      <span className="text-xs text-indigo-500">답안 작성 후 핵심 포인트를 확인하세요</span>
+                    )}
+                  </div>
+                </div>
 
                 <button
                   onClick={() => setShowAnswer(!showAnswer)}
                   className={`w-full py-3.5 rounded-xl font-medium transition ${
                     showAnswer
-                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      ? 'bg-gray-100 text-gray-600 border border-gray-200'
                       : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200'
                   }`}
                 >
-                  {showAnswer ? '핵심 포인트 숨기기' : '핵심 포인트 보기'}
+                  {showAnswer ? '핵심 포인트 숨기기' : '✓ 답안 확인하기'}
                 </button>
 
                 {showAnswer && currentQuestion.keyPoints && (
                   <div className="mt-5 p-5 bg-amber-50 rounded-xl border border-amber-200">
-                    <h4 className="text-amber-800 font-semibold mb-3 flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5" />
-                      핵심 포인트
-                    </h4>
-                    <ul className="space-y-2.5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-amber-800 font-semibold flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        핵심 포인트 자기 평가
+                      </h4>
+                      <span className="text-sm text-amber-600 font-medium">
+                        {checkedPoints.length} / {currentQuestion.keyPoints.length}
+                      </span>
+                    </div>
+                    <ul className="space-y-3">
                       {currentQuestion.keyPoints.map((point, idx) => (
-                        <li key={idx} className="text-gray-700 flex items-start gap-2">
-                          <span className="text-amber-500 mt-1">•</span>
-                          <span>{point}</span>
+                        <li
+                          key={idx}
+                          onClick={() => toggleCheckPoint(idx)}
+                          className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition ${
+                            checkedPoints.includes(idx)
+                              ? 'bg-emerald-100 border border-emerald-300'
+                              : 'bg-white border border-gray-200 hover:border-amber-300'
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition ${
+                            checkedPoints.includes(idx)
+                              ? 'bg-emerald-500 border-emerald-500 text-white'
+                              : 'border-gray-300'
+                          }`}>
+                            {checkedPoints.includes(idx) && <CheckCircle className="w-3 h-3" />}
+                          </div>
+                          <span className={`${checkedPoints.includes(idx) ? 'text-emerald-800' : 'text-gray-700'}`}>
+                            {point}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -656,6 +707,13 @@ export default function InterviewSimulator() {
                         <p className="text-sm text-violet-700 flex items-start gap-2">
                           <span>💡</span>
                           <span><strong>Tip:</strong> {currentQuestion.tip}</span>
+                        </p>
+                      </div>
+                    )}
+                    {checkedPoints.length === currentQuestion.keyPoints.length && (
+                      <div className="mt-4 p-3 bg-emerald-100 rounded-lg border border-emerald-300">
+                        <p className="text-emerald-700 font-medium text-center">
+                          🎉 모든 핵심 포인트를 포함했습니다!
                         </p>
                       </div>
                     )}
