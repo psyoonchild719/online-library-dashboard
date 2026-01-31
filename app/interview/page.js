@@ -69,6 +69,7 @@ export default function InterviewSimulator() {
       casesData?.forEach(c => {
         const formatted = {
           id: c.id,
+          caseId: c.case_id,
           title: c.title,
           category: c.category,
           diagnosis: c.diagnosis,
@@ -550,9 +551,16 @@ export default function InterviewSimulator() {
               {/* 사례 헤더 - 답안 확인 후 정보 공개 */}
               <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">
-                    📋
-                  </span>
+                  {/* 고유번호 항상 표시 */}
+                  {currentCase.caseId && (
+                    <span className={`text-xs px-2 py-1 rounded font-mono font-medium ${
+                      currentCase.source === 'exam'
+                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                        : 'bg-violet-100 text-violet-700 border border-violet-200'
+                    }`}>
+                      {currentCase.caseId}
+                    </span>
+                  )}
                   {showAnswer && (
                     <>
                       <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${

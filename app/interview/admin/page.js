@@ -51,8 +51,38 @@ export default function AdminPage() {
 
   // 새 사례 폼
   const [newCase, setNewCase] = useState({
-    title: '', category: '우울/불안', diagnosis: '', topic: '', case_text: '', source: 'predicted', type: 'major'
+    title: '', category: '우울/불안', diagnosis: '', topic: '', case_text: '', source: 'predicted', type: 'major', case_id: ''
   });
+
+  // 예상 사례 고유번호 자동 생성
+  const generateCaseId = async (type, source) => {
+    if (source === 'exam') return ''; // 기출은 수동 입력
+
+    try {
+      // 해당 타입의 예상 사례 중 가장 큰 번호 찾기
+      const { data } = await supabase
+        .from('interview_cases')
+        .select('case_id')
+        .eq('type', type)
+        .eq('source', 'predicted')
+        .not('case_id', 'is', null);
+
+      const prefix = type === 'major' ? '예상-전공' : '예상-윤리';
+      let maxNum = 0;
+
+      data?.forEach(item => {
+        if (item.case_id?.startsWith(prefix)) {
+          const num = parseInt(item.case_id.replace(prefix, '').trim());
+          if (!isNaN(num) && num > maxNum) maxNum = num;
+        }
+      });
+
+      return `${prefix} ${maxNum + 1}`;
+    } catch (error) {
+      console.error('고유번호 생성 실패:', error);
+      return '';
+    }
+  };
 
   // 새 질문 폼
   const [newQuestion, setNewQuestion] = useState({
@@ -112,6 +142,12 @@ export default function AdminPage() {
       return;
     }
 
+    // 기출인데 고유번호가 없으면 경고
+    if (newCase.source === 'exam' && !newCase.case_id) {
+      alert('기출 사례는 고유번호(예: 전공 1, 윤리 3)를 입력해주세요.');
+      return;
+    }
+
     setSaving(true);
     try {
       // 연도 파싱 (쉼표로 구분된 문자열 → 배열)
@@ -120,13 +156,20 @@ export default function AdminPage() {
         yearsArray = newCase.years.split(',').map(y => y.trim()).filter(y => y);
       }
 
+      // 예상 사례는 고유번호 자동 생성
+      let caseId = newCase.case_id;
+      if (newCase.source === 'predicted' && !caseId) {
+        caseId = await generateCaseId(newCase.type, newCase.source);
+      }
+
       const insertData = {
         type: newCase.type,
         title: newCase.title,
         category: newCase.category,
         case_text: newCase.case_text,
         years: yearsArray,
-        source: newCase.source
+        source: newCase.source,
+        case_id: caseId || null
       };
 
       // 전공이면 diagnosis, 윤리면 topic
@@ -140,7 +183,7 @@ export default function AdminPage() {
 
       if (error) throw error;
 
-      setNewCase({ title: '', category: caseType === 'major' ? '우울/불안' : '비밀유지/기록', diagnosis: '', topic: '', case_text: '', source: 'predicted', type: caseType, years: '' });
+      setNewCase({ title: '', category: caseType === 'major' ? '우울/불안' : '비밀유지/기록', diagnosis: '', topic: '', case_text: '', source: 'predicted', type: caseType, years: '', case_id: '' });
       setShowAddCase(false);
       loadCases();
     } catch (error) {
@@ -157,7 +200,8 @@ export default function AdminPage() {
       const updateData = {
         title: caseData.title,
         category: caseData.category,
-        case_text: caseData.case_text
+        case_text: caseData.case_text,
+        case_id: caseData.case_id || null
       };
 
       // 전공이면 diagnosis, 윤리면 topic
@@ -427,7 +471,8 @@ export default function AdminPage() {
                 case_text: '',
                 source: 'predicted',
                 type: caseType,
-                years: ''
+                years: '',
+                case_id: ''
               });
               setShowAddCase(true);
             }}
@@ -474,17 +519,39 @@ export default function AdminPage() {
                   </select>
                 </div>
               </div>
-              {/* 기출인 경우 연도 입력 */}
+              {/* 기출인 경우 고유번호 및 연도 입력 */}
               {newCase.source === 'exam' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">출제 연도 (쉼표로 구분)</label>
-                  <input
-                    type="text"
-                    value={newCase.years || ''}
-                    onChange={(e) => setNewCase({ ...newCase, years: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    placeholder="예: 2018, 2019, 2021"
-                  />
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      고유번호 * <span className="text-gray-400 font-normal">(예: 전공 1, 윤리 3)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newCase.case_id || ''}
+                      onChange={(e) => setNewCase({ ...newCase, case_id: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                      placeholder="예: 전공 1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">출제 연도 (쉼표로 구분)</label>
+                    <input
+                      type="text"
+                      value={newCase.years || ''}
+                      onChange={(e) => setNewCase({ ...newCase, years: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                      placeholder="예: 2018, 2019, 2021"
+                    />
+                  </div>
+                </>
+              )}
+              {/* 예상인 경우 자동 생성 안내 */}
+              {newCase.source === 'predicted' && (
+                <div className="bg-violet-50 border border-violet-200 rounded-xl p-3">
+                  <p className="text-sm text-violet-700">
+                    💡 예상 사례의 고유번호는 저장 시 자동 생성됩니다 (예: 예상-전공 1)
+                  </p>
                 </div>
               )}
               <div>
@@ -572,6 +639,16 @@ export default function AdminPage() {
                 <div className="p-4 flex items-start justify-between">
                   <div className="flex-1 cursor-pointer" onClick={() => setExpandedCase(expandedCase === caseItem.id ? null : caseItem.id)}>
                     <div className="flex items-center gap-2 mb-1">
+                      {/* 고유번호 */}
+                      {caseItem.case_id && (
+                        <span className={`text-xs px-2 py-0.5 rounded font-mono font-medium ${
+                          caseItem.source === 'exam'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-violet-100 text-violet-700'
+                        }`}>
+                          {caseItem.case_id}
+                        </span>
+                      )}
                       <span className="text-xs px-2 py-0.5 bg-violet-100 text-violet-600 rounded-full font-medium">
                         {caseItem.category}
                       </span>
@@ -803,6 +880,19 @@ export default function AdminPage() {
                 </button>
               </div>
               <div className="space-y-4">
+                {/* 고유번호 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    고유번호 {editingCase.source === 'exam' ? '(기출)' : '(예상)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editingCase.case_id || ''}
+                    onChange={(e) => setEditingCase({ ...editingCase, case_id: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl font-mono"
+                    placeholder={editingCase.source === 'exam' ? '예: 전공 1' : '예: 예상-전공 1'}
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
                   <input
