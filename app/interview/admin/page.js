@@ -649,7 +649,7 @@ export default function AdminPage() {
                           {caseItem.case_id}
                         </span>
                       )}
-                      <span className="text-xs px-2 py-0.5 bg-violet-100 text-violet-600 rounded-full font-medium">
+                      <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full font-medium">
                         {caseItem.category}
                       </span>
                       <span className="text-xs text-gray-400">
