@@ -56,7 +56,7 @@ export default function AdminPage() {
 
   // 새 질문 폼
   const [newQuestion, setNewQuestion] = useState({
-    question: '', key_points: '', tip: ''
+    question: '', key_points: '', tip: '', model_answer: ''
   });
 
   // 인증 확인
@@ -219,13 +219,14 @@ export default function AdminPage() {
         question: newQuestion.question,
         key_points: keyPointsArray,
         tip: newQuestion.tip || null,
+        model_answer: newQuestion.model_answer || null,
         order_num: 1,
         source: 'predicted'
       });
 
       if (error) throw error;
 
-      setNewQuestion({ question: '', key_points: '', tip: '' });
+      setNewQuestion({ question: '', key_points: '', tip: '', model_answer: '' });
       setShowAddQuestion(null);
       loadCases();
     } catch (error) {
@@ -248,7 +249,8 @@ export default function AdminPage() {
         .update({
           question: questionData.question,
           key_points: keyPointsArray,
-          tip: questionData.tip
+          tip: questionData.tip,
+          model_answer: questionData.model_answer || null
         })
         .eq('id', questionData.id);
 
@@ -658,6 +660,15 @@ export default function AdminPage() {
                                 placeholder="팁 내용"
                               />
                             </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">📝 모범 답안</label>
+                              <textarea
+                                value={newQuestion.model_answer}
+                                onChange={(e) => setNewQuestion({ ...newQuestion, model_answer: e.target.value })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm h-32"
+                                placeholder="모범 답안을 입력하세요..."
+                              />
+                            </div>
                             <div className="flex gap-2 justify-end">
                               <button
                                 onClick={() => setShowAddQuestion(null)}
@@ -706,6 +717,12 @@ export default function AdminPage() {
                                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                       placeholder="Tip"
                                     />
+                                    <textarea
+                                      value={editingQuestion.model_answer || ''}
+                                      onChange={(e) => setEditingQuestion({ ...editingQuestion, model_answer: e.target.value })}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm h-24"
+                                      placeholder="📝 모범 답안"
+                                    />
                                     <div className="flex gap-2 justify-end">
                                       <button
                                         onClick={() => setEditingQuestion(null)}
@@ -738,6 +755,11 @@ export default function AdminPage() {
                                       )}
                                       {q.tip && (
                                         <p className="text-xs text-violet-600 mt-1">💡 {q.tip}</p>
+                                      )}
+                                      {q.model_answer && (
+                                        <p className="text-xs text-emerald-600 mt-1 bg-emerald-50 p-2 rounded">
+                                          📝 모범 답안 있음
+                                        </p>
                                       )}
                                     </div>
                                     <div className="flex items-center gap-1 ml-2">

@@ -81,7 +81,8 @@ export default function InterviewSimulator() {
             .map(q => ({
               q: q.question,
               keyPoints: q.key_points || [],
-              tip: q.tip
+              tip: q.tip,
+              modelAnswer: q.model_answer
             }))
         };
 
@@ -705,6 +706,21 @@ export default function InterviewSimulator() {
                           <span>💡</span>
                           <span><strong>Tip:</strong> {currentQuestion.tip}</span>
                         </p>
+                      </div>
+                    )}
+                    {currentQuestion.modelAnswer && (
+                      <div className="mt-4 pt-4 border-t border-amber-200">
+                        <details className="group">
+                          <summary className="cursor-pointer text-sm font-medium text-blue-700 hover:text-blue-800 flex items-center gap-2">
+                            <span>📝</span>
+                            <span>모범 답안 보기</span>
+                          </summary>
+                          <div className="mt-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                              {currentQuestion.modelAnswer}
+                            </p>
+                          </div>
+                        </details>
                       </div>
                     )}
                     {checkedPoints.length === currentQuestion.keyPoints.length && (
