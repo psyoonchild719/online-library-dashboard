@@ -47,7 +47,7 @@ export default function InterviewSimulator() {
   const [showCase, setShowCase] = useState(true);
   const [timer, setTimer] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [includePredicted, setIncludePredicted] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState('exam'); // 'exam' | 'predicted' | 'all'
   const [practiceCount, setPracticeCount] = useState(0);
 
   // DB에서 사례 로드
@@ -114,26 +114,36 @@ export default function InterviewSimulator() {
 
   // 현재 사용할 데이터 소스 결정
   const getDataSource = () => {
+    if (caseType === 'ethics') {
+      return useDb ? dbCases.ethics : ethicsCases;
+    }
+
+    // 전공의 경우 sourceFilter에 따라 필터링
     if (useDb) {
-      const baseCases = caseType === 'major' ? dbCases.major : dbCases.ethics;
-      if (caseType === 'major' && includePredicted) {
-        return [...baseCases];
-      }
-      if (caseType === 'major') {
-        return baseCases.filter(c => c.source === 'exam');
-      }
-      return baseCases;
+      const allMajor = dbCases.major;
+      if (sourceFilter === 'exam') return allMajor.filter(c => c.source === 'exam');
+      if (sourceFilter === 'predicted') return allMajor.filter(c => c.source === 'predicted');
+      return allMajor; // 'all'
     } else {
-      const baseCases = caseType === 'major' ? majorCases : ethicsCases;
-      if (caseType === 'major' && includePredicted) {
-        return [...baseCases, ...predictedCases];
-      }
-      return baseCases;
+      if (sourceFilter === 'exam') return majorCases;
+      if (sourceFilter === 'predicted') return predictedCases;
+      return [...majorCases, ...predictedCases]; // 'all'
     }
   };
 
   const currentCases = getDataSource();
-  const currentCategories = caseType === 'major' ? majorCategories : ethicsCategories;
+
+  // 현재 데이터 소스에서 카테고리 동적 추출
+  const currentCategories = (() => {
+    if (caseType === 'ethics') return ethicsCategories;
+
+    const categories = [...new Set(currentCases.map(c => c.category))];
+    // 정렬 순서 유지
+    const order = ['강박/정신증', '우울/불안', '외상/스트레스', '성격장애', '신경발달',
+                   '신체증상', '감별진단', '섭식장애', '해리장애', '물질관련', '신경인지', '충동조절'];
+    categories.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    return ['전체', ...categories];
+  })();
 
   const filteredCases = currentCases.filter(c => {
     if (selectedCategory !== '전체' && c.category !== selectedCategory) return false;
@@ -232,7 +242,7 @@ export default function InterviewSimulator() {
     setCurrentCaseIndex(0);
     setCurrentQuestionIndex(0);
     setShowAnswer(false);
-  }, [caseType, selectedCategory, includePredicted]);
+  }, [caseType, selectedCategory, sourceFilter]);
 
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
@@ -413,7 +423,7 @@ export default function InterviewSimulator() {
             }`}
           >
             <BookOpen className="w-5 h-5" />
-            전공 ({includePredicted ? majorExamCount + majorPredictedCount : majorExamCount})
+            전공 ({majorExamCount + majorPredictedCount})
           </button>
           <button
             onClick={() => setCaseType('ethics')}
@@ -428,27 +438,50 @@ export default function InterviewSimulator() {
           </button>
         </div>
 
-        {/* 예상문제 포함 토글 (전공일 때만) */}
+        {/* 기출/예상 소스 필터 (전공일 때만) */}
         {caseType === 'major' && (
           <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="bg-white rounded-xl p-1 shadow-sm border border-gray-200 flex gap-1">
+                <button
+                  onClick={() => setSourceFilter('exam')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    sourceFilter === 'exam'
+                      ? 'bg-blue-500 text-white shadow'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  📚 기출 ({majorExamCount})
+                </button>
+                <button
+                  onClick={() => setSourceFilter('predicted')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    sourceFilter === 'predicted'
+                      ? 'bg-violet-500 text-white shadow'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  🔮 예상 ({majorPredictedCount})
+                </button>
+                <button
+                  onClick={() => setSourceFilter('all')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    sourceFilter === 'all'
+                      ? 'bg-gray-700 text-white shadow'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  전체
+                </button>
+              </div>
+            </div>
             <Link
               href="/interview/admin"
               className="flex items-center gap-2 text-sm text-gray-500 hover:text-violet-600 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm hover:border-violet-300 transition"
             >
               <Settings className="w-4 h-4" />
-              예상문제 관리
+              관리
             </Link>
-            <label className="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
-              <input
-                type="checkbox"
-                checked={includePredicted}
-                onChange={(e) => setIncludePredicted(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-violet-500 focus:ring-violet-500"
-              />
-              <span className="text-sm text-gray-600">
-                🔮 예상문제 포함 <span className="text-violet-500 font-medium">+{majorPredictedCount}</span>
-              </span>
-            </label>
           </div>
         )}
 
