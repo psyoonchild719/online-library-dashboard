@@ -253,6 +253,11 @@ export default function AdminPage() {
 
     setSaving(true);
     try {
+      // 기존 질문들의 최대 order_num 찾기
+      const caseData = cases.find(c => c.id === caseId);
+      const existingQuestions = caseData?.interview_questions || [];
+      const maxOrderNum = existingQuestions.reduce((max, q) => Math.max(max, q.order_num || 0), 0);
+
       const keyPointsArray = newQuestion.key_points
         .split('\n')
         .map(s => s.trim())
@@ -264,7 +269,7 @@ export default function AdminPage() {
         key_points: keyPointsArray,
         tip: newQuestion.tip || null,
         model_answer: newQuestion.model_answer || null,
-        order_num: 1,
+        order_num: maxOrderNum + 1,
         source: 'predicted'
       });
 
