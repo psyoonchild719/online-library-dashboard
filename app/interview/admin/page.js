@@ -1,0 +1,679 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import {
+  Plus, Trash2, Edit3, Save, X, ChevronDown, ChevronUp,
+  Home, Brain, AlertCircle, LogOut, Loader2, ArrowLeft
+} from 'lucide-react';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// 관리자 이메일
+const ADMIN_EMAILS = ['psyoonchild@gmail.com'];
+
+// 카테고리 옵션
+const CATEGORIES = [
+  '강박/정신증', '우울/불안', '외상/스트레스', '성격장애', '신경발달',
+  '신체증상', '감별진단', '섭식장애', '해리장애', '물질관련', '신경인지', '충동조절'
+];
+
+export default function AdminPage() {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedCase, setExpandedCase] = useState(null);
+  const [editingCase, setEditingCase] = useState(null);
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [showAddCase, setShowAddCase] = useState(false);
+  const [showAddQuestion, setShowAddQuestion] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // 새 사례 폼
+  const [newCase, setNewCase] = useState({
+    title: '', category: '우울/불안', diagnosis: '', case_text: ''
+  });
+
+  // 새 질문 폼
+  const [newQuestion, setNewQuestion] = useState({
+    question: '', key_points: '', tip: ''
+  });
+
+  // 인증 확인
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 사례 로드
+  useEffect(() => {
+    if (user && ADMIN_EMAILS.includes(user.email)) {
+      loadCases();
+    }
+  }, [user]);
+
+  const loadCases = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('interview_cases')
+        .select(`*, interview_questions (*)`)
+        .eq('source', 'predicted')
+        .order('id', { ascending: false });
+
+      if (error) throw error;
+      setCases(data || []);
+    } catch (error) {
+      console.error('로드 실패:', error);
+      alert('데이터 로드 실패: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 사례 추가
+  const handleAddCase = async () => {
+    if (!newCase.title || !newCase.case_text) {
+      alert('제목과 사례 내용은 필수입니다.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('interview_cases').insert({
+        type: 'major',
+        title: newCase.title,
+        category: newCase.category,
+        diagnosis: newCase.diagnosis || null,
+        case_text: newCase.case_text,
+        years: ['예상'],
+        source: 'predicted'
+      });
+
+      if (error) throw error;
+
+      setNewCase({ title: '', category: '우울/불안', diagnosis: '', case_text: '' });
+      setShowAddCase(false);
+      loadCases();
+    } catch (error) {
+      alert('추가 실패: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 사례 수정
+  const handleUpdateCase = async (caseData) => {
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('interview_cases')
+        .update({
+          title: caseData.title,
+          category: caseData.category,
+          diagnosis: caseData.diagnosis,
+          case_text: caseData.case_text
+        })
+        .eq('id', caseData.id);
+
+      if (error) throw error;
+
+      setEditingCase(null);
+      loadCases();
+    } catch (error) {
+      alert('수정 실패: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 사례 삭제
+  const handleDeleteCase = async (caseId) => {
+    if (!confirm('이 사례와 모든 질문을 삭제하시겠습니까?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('interview_cases')
+        .delete()
+        .eq('id', caseId);
+
+      if (error) throw error;
+      loadCases();
+    } catch (error) {
+      alert('삭제 실패: ' + error.message);
+    }
+  };
+
+  // 질문 추가
+  const handleAddQuestion = async (caseId) => {
+    if (!newQuestion.question) {
+      alert('질문 내용은 필수입니다.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const keyPointsArray = newQuestion.key_points
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s);
+
+      const { error } = await supabase.from('interview_questions').insert({
+        case_id: caseId,
+        question: newQuestion.question,
+        key_points: keyPointsArray,
+        tip: newQuestion.tip || null,
+        order_num: 1,
+        source: 'predicted'
+      });
+
+      if (error) throw error;
+
+      setNewQuestion({ question: '', key_points: '', tip: '' });
+      setShowAddQuestion(null);
+      loadCases();
+    } catch (error) {
+      alert('질문 추가 실패: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 질문 수정
+  const handleUpdateQuestion = async (questionData) => {
+    setSaving(true);
+    try {
+      const keyPointsArray = Array.isArray(questionData.key_points)
+        ? questionData.key_points
+        : questionData.key_points.split('\n').map(s => s.trim()).filter(s => s);
+
+      const { error } = await supabase
+        .from('interview_questions')
+        .update({
+          question: questionData.question,
+          key_points: keyPointsArray,
+          tip: questionData.tip
+        })
+        .eq('id', questionData.id);
+
+      if (error) throw error;
+
+      setEditingQuestion(null);
+      loadCases();
+    } catch (error) {
+      alert('질문 수정 실패: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 질문 삭제
+  const handleDeleteQuestion = async (questionId) => {
+    if (!confirm('이 질문을 삭제하시겠습니까?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('interview_questions')
+        .delete()
+        .eq('id', questionId);
+
+      if (error) throw error;
+      loadCases();
+    } catch (error) {
+      alert('질문 삭제 실패: ' + error.message);
+    }
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
+
+  // 로딩 화면
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      </div>
+    );
+  }
+
+  // 비로그인
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100">
+          <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">로그인이 필요합니다</h2>
+          <a href="/interview" className="text-indigo-600 hover:underline">
+            면접 시뮬레이터로 이동하여 로그인
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // 권한 없음
+  if (!ADMIN_EMAILS.includes(user.email)) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">관리자 권한 없음</h2>
+          <p className="text-gray-500 mb-4">{user.email}</p>
+          <button onClick={signOut} className="text-gray-500 hover:text-gray-700">
+            로그아웃
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* 헤더 */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <a href="/interview" className="text-gray-400 hover:text-gray-600 transition p-1">
+              <ArrowLeft className="w-5 h-5" />
+            </a>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+                <Brain className="w-4 h-4 text-violet-600" />
+              </div>
+              <h1 className="text-lg font-bold text-gray-800">예상문제 관리</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-500">{user.email}</span>
+            <button onClick={signOut} className="text-gray-400 hover:text-gray-600 transition p-1">
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        {/* 상단 액션 */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-gray-600">총 <span className="font-bold text-indigo-600">{cases.length}</span>개 예상문제</p>
+          <button
+            onClick={() => setShowAddCase(true)}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-indigo-700 transition shadow-lg shadow-indigo-200"
+          >
+            <Plus className="w-5 h-5" />
+            새 사례 추가
+          </button>
+        </div>
+
+        {/* 새 사례 추가 폼 */}
+        {showAddCase && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4 shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-4">새 예상문제 추가</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">제목 *</label>
+                <input
+                  type="text"
+                  value={newCase.title}
+                  onChange={(e) => setNewCase({ ...newCase, title: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="예: 30대 여성 섭식장애"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
+                  <select
+                    value={newCase.category}
+                    onChange={(e) => setNewCase({ ...newCase, category: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                  >
+                    {CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">진단</label>
+                  <input
+                    type="text"
+                    value={newCase.diagnosis}
+                    onChange={(e) => setNewCase({ ...newCase, diagnosis: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    placeholder="예: 신경성 식욕부진증"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">사례 내용 *</label>
+                <textarea
+                  value={newCase.case_text}
+                  onChange={(e) => setNewCase({ ...newCase, case_text: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 h-32"
+                  placeholder="사례 내용을 입력하세요..."
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => setShowAddCase(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleAddCase}
+                  disabled={saving}
+                  className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  저장
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 로딩 */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+          </div>
+        ) : cases.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+            <p className="text-gray-500">등록된 예상문제가 없습니다.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {cases.map(caseItem => (
+              <div key={caseItem.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                {/* 사례 헤더 */}
+                <div className="p-4 flex items-start justify-between">
+                  <div className="flex-1 cursor-pointer" onClick={() => setExpandedCase(expandedCase === caseItem.id ? null : caseItem.id)}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs px-2 py-0.5 bg-violet-100 text-violet-600 rounded-full font-medium">
+                        {caseItem.category}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        질문 {caseItem.interview_questions?.length || 0}개
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-gray-800">{caseItem.title}</h3>
+                    {caseItem.diagnosis && (
+                      <p className="text-sm text-gray-500">진단: {caseItem.diagnosis}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setEditingCase(caseItem)}
+                      className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCase(caseItem.id)}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setExpandedCase(expandedCase === caseItem.id ? null : caseItem.id)}
+                      className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition"
+                    >
+                      {expandedCase === caseItem.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* 확장된 내용 */}
+                {expandedCase === caseItem.id && (
+                  <div className="border-t border-gray-100">
+                    {/* 사례 내용 */}
+                    <div className="p-4 bg-gray-50">
+                      <p className="text-sm text-gray-600 whitespace-pre-wrap">{caseItem.case_text}</p>
+                    </div>
+
+                    {/* 질문 목록 */}
+                    <div className="p-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-700">질문 목록</h4>
+                        <button
+                          onClick={() => setShowAddQuestion(caseItem.id)}
+                          className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700"
+                        >
+                          <Plus className="w-4 h-4" />
+                          질문 추가
+                        </button>
+                      </div>
+
+                      {/* 새 질문 추가 폼 */}
+                      {showAddQuestion === caseItem.id && (
+                        <div className="bg-indigo-50 rounded-xl p-4 mb-3 border border-indigo-100">
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">질문 *</label>
+                              <input
+                                type="text"
+                                value={newQuestion.question}
+                                onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                placeholder="질문 내용"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">핵심 포인트 (줄바꿈으로 구분)</label>
+                              <textarea
+                                value={newQuestion.key_points}
+                                onChange={(e) => setNewQuestion({ ...newQuestion, key_points: e.target.value })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm h-20"
+                                placeholder="포인트1&#10;포인트2&#10;포인트3"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Tip</label>
+                              <input
+                                type="text"
+                                value={newQuestion.tip}
+                                onChange={(e) => setNewQuestion({ ...newQuestion, tip: e.target.value })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                placeholder="팁 내용"
+                              />
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                              <button
+                                onClick={() => setShowAddQuestion(null)}
+                                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+                              >
+                                취소
+                              </button>
+                              <button
+                                onClick={() => handleAddQuestion(caseItem.id)}
+                                disabled={saving}
+                                className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+                              >
+                                {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                저장
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 질문 리스트 */}
+                      {caseItem.interview_questions?.length > 0 ? (
+                        <div className="space-y-2">
+                          {caseItem.interview_questions
+                            .sort((a, b) => a.order_num - b.order_num)
+                            .map((q, idx) => (
+                              <div key={q.id} className="bg-gray-50 rounded-xl p-3 border border-gray-200">
+                                {editingQuestion?.id === q.id ? (
+                                  <div className="space-y-2">
+                                    <input
+                                      type="text"
+                                      value={editingQuestion.question}
+                                      onChange={(e) => setEditingQuestion({ ...editingQuestion, question: e.target.value })}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                    />
+                                    <textarea
+                                      value={Array.isArray(editingQuestion.key_points) ? editingQuestion.key_points.join('\n') : editingQuestion.key_points}
+                                      onChange={(e) => setEditingQuestion({ ...editingQuestion, key_points: e.target.value })}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm h-20"
+                                      placeholder="핵심 포인트 (줄바꿈 구분)"
+                                    />
+                                    <input
+                                      type="text"
+                                      value={editingQuestion.tip || ''}
+                                      onChange={(e) => setEditingQuestion({ ...editingQuestion, tip: e.target.value })}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      placeholder="Tip"
+                                    />
+                                    <div className="flex gap-2 justify-end">
+                                      <button
+                                        onClick={() => setEditingQuestion(null)}
+                                        className="px-3 py-1 border border-gray-300 rounded-lg text-xs text-gray-600"
+                                      >
+                                        취소
+                                      </button>
+                                      <button
+                                        onClick={() => handleUpdateQuestion(editingQuestion)}
+                                        disabled={saving}
+                                        className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs"
+                                      >
+                                        {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                        저장
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <p className="text-sm font-medium text-gray-800 mb-1">
+                                        Q{idx + 1}. {q.question}
+                                      </p>
+                                      {q.key_points?.length > 0 && (
+                                        <ul className="text-xs text-gray-500 ml-4">
+                                          {q.key_points.map((point, i) => (
+                                            <li key={i}>• {point}</li>
+                                          ))}
+                                        </ul>
+                                      )}
+                                      {q.tip && (
+                                        <p className="text-xs text-violet-600 mt-1">💡 {q.tip}</p>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-1 ml-2">
+                                      <button
+                                        onClick={() => setEditingQuestion(q)}
+                                        className="p-1 text-gray-400 hover:text-indigo-600"
+                                      >
+                                        <Edit3 className="w-3 h-3" />
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteQuestion(q.id)}
+                                        className="p-1 text-gray-400 hover:text-red-600"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-400 text-center py-4">등록된 질문이 없습니다.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 사례 수정 모달 */}
+        {editingCase && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-lg text-gray-800">사례 수정</h3>
+                <button onClick={() => setEditingCase(null)} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
+                  <input
+                    type="text"
+                    value={editingCase.title}
+                    onChange={(e) => setEditingCase({ ...editingCase, title: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
+                    <select
+                      value={editingCase.category}
+                      onChange={(e) => setEditingCase({ ...editingCase, category: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl"
+                    >
+                      {CATEGORIES.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">진단</label>
+                    <input
+                      type="text"
+                      value={editingCase.diagnosis || ''}
+                      onChange={(e) => setEditingCase({ ...editingCase, diagnosis: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">사례 내용</label>
+                  <textarea
+                    value={editingCase.case_text}
+                    onChange={(e) => setEditingCase({ ...editingCase, case_text: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl h-40"
+                  />
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => setEditingCase(null)}
+                    className="px-4 py-2 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={() => handleUpdateCase(editingCase)}
+                    disabled={saving}
+                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50"
+                  >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    저장
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
