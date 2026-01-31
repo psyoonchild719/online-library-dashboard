@@ -5,8 +5,10 @@ import { createClient } from '@supabase/supabase-js';
 import {
   BookOpen, Brain, Scale, ChevronRight, ChevronLeft,
   Eye, EyeOff, Clock, RotateCcw, Home, LogIn, LogOut,
-  CheckCircle, AlertCircle, Shuffle, Filter, X
+  CheckCircle, AlertCircle, Shuffle, Database, RefreshCw
 } from 'lucide-react';
+
+// Fallback: 하드코딩된 데이터 (DB 실패 시 사용)
 import { majorCases, ethicsCases, majorCategories, ethicsCategories, predictedCases } from '../../data/cases';
 
 // Supabase 클라이언트 설정
@@ -14,7 +16,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// 허용된 멤버 목록 (기존 앱과 동일)
+// 허용된 멤버 목록
 const ALLOWED_MEMBERS = {
   'psyoonchild@gmail.com': { name: '김지윤', avatar: '🦊' },
   'pit-a-pat@hotmail.co.kr': { name: '조하나', avatar: '🐰' },
@@ -27,10 +29,16 @@ const ALLOWED_MEMBERS = {
 export default function InterviewSimulator() {
   // 인증 상태
   const [user, setUser] = useState(null);
+  const [currentMember, setCurrentMember] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
+  // DB 상태
+  const [useDatabase, setUseDatabase] = useState(true);
+  const [dbCases, setDbCases] = useState({ major: [], ethics: [] });
+  const [dbLoading, setDbLoading] = useState(true);
+
   // 시뮬레이터 상태
-  const [caseType, setCaseType] = useState('major'); // 'major' | 'ethics'
+  const [caseType, setCaseType] = useState('major');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [currentCaseIndex, setCurrentCaseIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -38,18 +46,86 @@ export default function InterviewSimulator() {
   const [showCase, setShowCase] = useState(true);
   const [timer, setTimer] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [practiceLog, setPracticeLog] = useState([]);
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [includePredicted, setIncludePredicted] = useState(false); // 예상문제 포함 여부
+  const [includePredicted, setIncludePredicted] = useState(false);
+  const [practiceCount, setPracticeCount] = useState(0);
 
-  // 현재 유형의 사례 및 카테고리 목록 (예상문제는 전공만 해당)
-  const baseCases = caseType === 'major' ? majorCases : ethicsCases;
-  const currentCases = caseType === 'major' && includePredicted
-    ? [...baseCases, ...predictedCases]
-    : baseCases;
+  // DB에서 사례 로드
+  const loadCasesFromDB = useCallback(async () => {
+    setDbLoading(true);
+    try {
+      const { data: casesData, error: casesError } = await supabase
+        .from('interview_cases')
+        .select(`
+          *,
+          interview_questions (*)
+        `)
+        .order('id');
+
+      if (casesError) throw casesError;
+
+      const majorList = [];
+      const ethicsList = [];
+
+      casesData?.forEach(c => {
+        const formatted = {
+          id: c.id,
+          title: c.title,
+          category: c.category,
+          diagnosis: c.diagnosis,
+          topic: c.topic,
+          caseText: c.case_text,
+          years: c.years || [],
+          source: c.source,
+          questions: (c.interview_questions || [])
+            .sort((a, b) => a.order_num - b.order_num)
+            .map(q => ({
+              q: q.question,
+              keyPoints: q.key_points || [],
+              tip: q.tip
+            }))
+        };
+
+        if (c.type === 'major') {
+          majorList.push(formatted);
+        } else if (c.type === 'ethics') {
+          ethicsList.push(formatted);
+        }
+      });
+
+      setDbCases({ major: majorList, ethics: ethicsList });
+      console.log(`DB 로드 완료: 전공 ${majorList.length}건, 윤리 ${ethicsList.length}건`);
+    } catch (error) {
+      console.error('DB 로드 실패:', error);
+      setUseDatabase(false);
+    } finally {
+      setDbLoading(false);
+    }
+  }, []);
+
+  // 현재 사용할 데이터 소스 결정
+  const getDataSource = () => {
+    if (useDatabase && (dbCases.major.length > 0 || dbCases.ethics.length > 0)) {
+      const baseCases = caseType === 'major' ? dbCases.major : dbCases.ethics;
+      if (caseType === 'major' && includePredicted) {
+        const examCases = baseCases.filter(c => c.source === 'exam');
+        const predicted = baseCases.filter(c => c.source === 'predicted');
+        return { cases: [...examCases, ...predicted], examCount: examCases.length, predictedCount: predicted.length };
+      }
+      const examCases = baseCases.filter(c => c.source === 'exam');
+      const predicted = baseCases.filter(c => c.source === 'predicted');
+      return { cases: examCases, examCount: examCases.length, predictedCount: predicted.length };
+    } else {
+      const baseCases = caseType === 'major' ? majorCases : ethicsCases;
+      if (caseType === 'major' && includePredicted) {
+        return { cases: [...baseCases, ...predictedCases], examCount: baseCases.length, predictedCount: predictedCases.length };
+      }
+      return { cases: baseCases, examCount: baseCases.length, predictedCount: predictedCases.length };
+    }
+  };
+
+  const { cases: currentCases, examCount, predictedCount } = getDataSource();
   const currentCategories = caseType === 'major' ? majorCategories : ethicsCategories;
 
-  // 필터링된 사례 목록
   const filteredCases = currentCases.filter(c => {
     if (selectedCategory !== '전체' && c.category !== selectedCategory) return false;
     return true;
@@ -72,6 +148,65 @@ export default function InterviewSimulator() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // 멤버 정보 로드
+  useEffect(() => {
+    if (user && ALLOWED_MEMBERS[user.email]) {
+      loadCurrentMember();
+    }
+  }, [user]);
+
+  const loadCurrentMember = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('members')
+      .select('*')
+      .eq('email', user.email)
+      .single();
+    if (data) setCurrentMember(data);
+  };
+
+  // DB에서 사례 로드
+  useEffect(() => {
+    loadCasesFromDB();
+  }, [loadCasesFromDB]);
+
+  // 오늘 연습 횟수 로드
+  useEffect(() => {
+    if (currentMember) {
+      loadTodayPracticeCount();
+    }
+  }, [currentMember]);
+
+  const loadTodayPracticeCount = async () => {
+    if (!currentMember) return;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const { count } = await supabase
+      .from('interview_logs')
+      .select('*', { count: 'exact', head: true })
+      .eq('member_id', currentMember.id)
+      .gte('created_at', today.toISOString());
+
+    setPracticeCount(count || 0);
+  };
+
+  // 연습 기록 저장
+  const logPractice = async () => {
+    if (!currentMember || !currentCase) return;
+
+    try {
+      await supabase.from('interview_logs').insert({
+        member_id: currentMember.id,
+        case_id: currentCase.id,
+        time_spent: timer
+      });
+      setPracticeCount(prev => prev + 1);
+    } catch (error) {
+      console.error('연습 기록 저장 실패:', error);
+    }
+  };
+
   // 타이머
   useEffect(() => {
     let interval;
@@ -88,7 +223,7 @@ export default function InterviewSimulator() {
     setCurrentCaseIndex(0);
     setCurrentQuestionIndex(0);
     setShowAnswer(false);
-  }, [caseType, selectedCategory]);
+  }, [caseType, selectedCategory, includePredicted]);
 
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
@@ -108,6 +243,8 @@ export default function InterviewSimulator() {
   };
 
   const nextCase = () => {
+    if (timer > 30) logPractice();
+
     if (currentCaseIndex < filteredCases.length - 1) {
       setCurrentCaseIndex(prev => prev + 1);
       setCurrentQuestionIndex(0);
@@ -140,6 +277,8 @@ export default function InterviewSimulator() {
   };
 
   const randomCase = () => {
+    if (timer > 30) logPractice();
+
     const randomIndex = Math.floor(Math.random() * filteredCases.length);
     setCurrentCaseIndex(randomIndex);
     setCurrentQuestionIndex(0);
@@ -211,8 +350,19 @@ export default function InterviewSimulator() {
               <Brain className="w-5 h-5 text-purple-400" />
               면접 시뮬레이터
             </h1>
+            {/* DB 상태 표시 */}
+            <span className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+              useDatabase && !dbLoading ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'
+            }`}>
+              <Database className="w-3 h-3" />
+              {dbLoading ? '로딩' : useDatabase ? 'DB' : '파일'}
+            </span>
           </div>
           <div className="flex items-center gap-3">
+            {/* 오늘 연습 횟수 */}
+            <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full">
+              오늘 {practiceCount}건 연습
+            </span>
             <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
               <img
                 src={user.user_metadata?.avatar_url || '/default-avatar.png'}
@@ -246,7 +396,7 @@ export default function InterviewSimulator() {
             }`}
           >
             <BookOpen className="w-5 h-5" />
-            전공 ({includePredicted ? majorCases.length + predictedCases.length : majorCases.length})
+            전공 ({includePredicted ? examCount + predictedCount : examCount})
           </button>
           <button
             onClick={() => setCaseType('ethics')}
@@ -257,7 +407,7 @@ export default function InterviewSimulator() {
             }`}
           >
             <Scale className="w-5 h-5" />
-            윤리 ({ethicsCases.length})
+            윤리 ({useDatabase ? dbCases.ethics.length : ethicsCases.length})
           </button>
         </div>
 
@@ -268,15 +418,11 @@ export default function InterviewSimulator() {
               <input
                 type="checkbox"
                 checked={includePredicted}
-                onChange={(e) => {
-                  setIncludePredicted(e.target.checked);
-                  setCurrentCaseIndex(0);
-                  setCurrentQuestionIndex(0);
-                }}
+                onChange={(e) => setIncludePredicted(e.target.checked)}
                 className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500"
               />
               <span className="text-sm text-gray-300">
-                🔮 DSM-5-TR 예상문제 포함 (+{predictedCases.length}건)
+                🔮 DSM-5-TR 예상문제 포함 (+{predictedCount}건)
               </span>
             </label>
           </div>
@@ -340,12 +486,19 @@ export default function InterviewSimulator() {
               {/* 사례 헤더 */}
               <div className="p-4 border-b border-white/10 flex items-center justify-between">
                 <div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    caseType === 'major' ? 'bg-blue-500/30 text-blue-300' : 'bg-green-500/30 text-green-300'
-                  }`}>
-                    {currentCase.category}
-                  </span>
-                  <h2 className="text-lg font-bold text-white mt-2">{currentCase.title}</h2>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      caseType === 'major' ? 'bg-blue-500/30 text-blue-300' : 'bg-green-500/30 text-green-300'
+                    }`}>
+                      {currentCase.category}
+                    </span>
+                    {currentCase.source === 'predicted' && (
+                      <span className="text-xs px-2 py-1 rounded-full bg-purple-500/30 text-purple-300">
+                        🔮 예상
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-lg font-bold text-white">{currentCase.title}</h2>
                   {currentCase.diagnosis && (
                     <p className="text-sm text-gray-400 mt-1">진단: {currentCase.diagnosis}</p>
                   )}
@@ -430,6 +583,11 @@ export default function InterviewSimulator() {
                         </li>
                       ))}
                     </ul>
+                    {currentQuestion.tip && (
+                      <p className="mt-3 text-sm text-purple-300 italic">
+                        💡 Tip: {currentQuestion.tip}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -459,6 +617,9 @@ export default function InterviewSimulator() {
           <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-8 text-center">
             <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
             <p className="text-gray-300">해당 카테고리에 사례가 없습니다.</p>
+            {dbLoading && (
+              <p className="text-gray-400 text-sm mt-2">데이터 로딩 중...</p>
+            )}
           </div>
         )}
       </main>
