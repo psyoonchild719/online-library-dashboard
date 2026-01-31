@@ -304,7 +304,11 @@ export default function AdminPage() {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
-              <span className="text-lg">{ALLOWED_MEMBERS[user.email]?.avatar}</span>
+              <img
+                src={user.user_metadata?.avatar_url || '/default-avatar.png'}
+                alt="프로필"
+                className="w-6 h-6 rounded-full"
+              />
               <span className="text-sm text-gray-700 font-medium">
                 {ALLOWED_MEMBERS[user.email]?.name}
               </span>
