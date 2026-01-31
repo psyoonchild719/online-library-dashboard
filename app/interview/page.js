@@ -548,9 +548,12 @@ export default function InterviewSimulator() {
               {formatTime(timer)}
             </button>
             <button
-              onClick={() => setTimer(0)}
+              onClick={() => {
+                setTimer(0);
+                resetAnswerState();
+              }}
               className="p-2 bg-white rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition border border-gray-200"
-              title="타이머 리셋"
+              title="처음부터 다시"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -564,8 +567,8 @@ export default function InterviewSimulator() {
               {/* 사례 헤더 - 답안 확인 후 정보 공개 */}
               <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-500">
-                    사례 {currentCaseIndex + 1}
+                  <span className="text-xs text-gray-400">
+                    📋
                   </span>
                   {showAnswer && (
                     <>
