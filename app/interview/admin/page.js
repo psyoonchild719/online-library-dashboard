@@ -154,14 +154,22 @@ export default function AdminPage() {
   const handleUpdateCase = async (caseData) => {
     setSaving(true);
     try {
+      const updateData = {
+        title: caseData.title,
+        category: caseData.category,
+        case_text: caseData.case_text
+      };
+
+      // 전공이면 diagnosis, 윤리면 topic
+      if (caseData.type === 'ethics') {
+        updateData.topic = caseData.topic || null;
+      } else {
+        updateData.diagnosis = caseData.diagnosis || null;
+      }
+
       const { error } = await supabase
         .from('interview_cases')
-        .update({
-          title: caseData.title,
-          category: caseData.category,
-          diagnosis: caseData.diagnosis,
-          case_text: caseData.case_text
-        })
+        .update(updateData)
         .eq('id', caseData.id);
 
       if (error) throw error;
@@ -790,17 +798,22 @@ export default function AdminPage() {
                       onChange={(e) => setEditingCase({ ...editingCase, category: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-xl"
                     >
-                      {CATEGORIES.map(cat => (
+                      {(editingCase.type === 'ethics' ? ETHICS_CATEGORIES : MAJOR_CATEGORIES).map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">진단</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {editingCase.type === 'ethics' ? '주제' : '진단'}
+                    </label>
                     <input
                       type="text"
-                      value={editingCase.diagnosis || ''}
-                      onChange={(e) => setEditingCase({ ...editingCase, diagnosis: e.target.value })}
+                      value={editingCase.type === 'ethics' ? (editingCase.topic || '') : (editingCase.diagnosis || '')}
+                      onChange={(e) => setEditingCase({
+                        ...editingCase,
+                        [editingCase.type === 'ethics' ? 'topic' : 'diagnosis']: e.target.value
+                      })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-xl"
                     />
                   </div>
