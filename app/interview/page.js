@@ -5,8 +5,9 @@ import { createClient } from '@supabase/supabase-js';
 import {
   BookOpen, Brain, Scale, ChevronRight, ChevronLeft,
   Eye, EyeOff, Clock, RotateCcw, Home, LogIn, LogOut,
-  CheckCircle, AlertCircle, Shuffle, Database
+  CheckCircle, AlertCircle, Shuffle, Database, Settings
 } from 'lucide-react';
+import Link from 'next/link';
 
 // Fallback: 하드코딩된 데이터 (DB 실패 시 사용)
 import { majorCases, ethicsCases, majorCategories, ethicsCategories, predictedCases } from '../../data/cases';
@@ -429,7 +430,14 @@ export default function InterviewSimulator() {
 
         {/* 예상문제 포함 토글 (전공일 때만) */}
         {caseType === 'major' && (
-          <div className="flex items-center justify-end gap-2 mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href="/interview/admin"
+              className="flex items-center gap-2 text-sm text-gray-500 hover:text-violet-600 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm hover:border-violet-300 transition"
+            >
+              <Settings className="w-4 h-4" />
+              예상문제 관리
+            </Link>
             <label className="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
               <input
                 type="checkbox"

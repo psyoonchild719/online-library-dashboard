@@ -11,8 +11,15 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// 관리자 이메일
-const ADMIN_EMAILS = ['psyoonchild@gmail.com'];
+// 허용된 멤버 목록 (모든 스터디 멤버 접근 가능)
+const ALLOWED_MEMBERS = {
+  'psyoonchild@gmail.com': { name: '김지윤', avatar: '🦊' },
+  'pit-a-pat@hotmail.co.kr': { name: '조하나', avatar: '🐰' },
+  'khk9440@ewhain.net': { name: '곽호경', avatar: '🐻' },
+  'youjin13ae@gmail.com': { name: '배유진', avatar: '🐱' },
+  'hipsychology@gmail.com': { name: '황해인', avatar: '🐶' },
+  'dawoon85@gmail.com': { name: '정다운', avatar: '🐼' },
+};
 
 // 카테고리 옵션
 const CATEGORIES = [
@@ -58,7 +65,7 @@ export default function AdminPage() {
 
   // 사례 로드
   useEffect(() => {
-    if (user && ADMIN_EMAILS.includes(user.email)) {
+    if (user && ALLOWED_MEMBERS[user.email]) {
       loadCases();
     }
   }, [user]);
@@ -264,12 +271,12 @@ export default function AdminPage() {
   }
 
   // 권한 없음
-  if (!ADMIN_EMAILS.includes(user.email)) {
+  if (!ALLOWED_MEMBERS[user.email]) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-800 mb-2">관리자 권한 없음</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">스터디 멤버만 접근 가능</h2>
           <p className="text-gray-500 mb-4">{user.email}</p>
           <button onClick={signOut} className="text-gray-500 hover:text-gray-700">
             로그아웃
