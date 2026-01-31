@@ -223,20 +223,24 @@ export async function GET(request) {
       insertedCases++;
 
       // 질문들 삽입
-      for (let i = 0; i < caseData.questions.length; i++) {
-        const q = caseData.questions[i];
-        const { error: qError } = await supabase
-          .from('interview_questions')
-          .insert({
-            case_id: insertedCase.id,
-            question: q.q,
-            key_points: q.keyPoints,
-            tip: q.tip || null,
-            order_num: i + 1,
-            source: 'predicted'
-          });
+      if (caseData.questions && insertedCase) {
+        for (let i = 0; i < caseData.questions.length; i++) {
+          const q = caseData.questions[i];
+          const { error: qError } = await supabase
+            .from('interview_questions')
+            .insert({
+              case_id: insertedCase.id,
+              question: q.q,
+              key_points: q.keyPoints || [],
+              order_num: i + 1
+            });
 
-        if (!qError) insertedQuestions++;
+          if (qError) {
+            console.error('Question insert error:', qError);
+          } else {
+            insertedQuestions++;
+          }
+        }
       }
     }
 
