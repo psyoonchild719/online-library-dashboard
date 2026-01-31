@@ -412,96 +412,99 @@ export default function InterviewSimulator() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6">
-        {/* 유형 선택 탭 */}
-        <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-gray-200 flex gap-1 mb-4">
-          <button
-            onClick={() => setCaseType('major')}
-            className={`flex-1 py-3 px-4 rounded-xl font-medium transition flex items-center justify-center gap-2 ${
-              caseType === 'major'
-                ? 'bg-blue-500 text-white shadow-lg shadow-blue-200'
-                : 'text-gray-500 hover:bg-gray-50'
-            }`}
-          >
-            <BookOpen className="w-5 h-5" />
-            전공 ({majorExamCount + majorPredictedCount})
-          </button>
-          <button
-            onClick={() => setCaseType('ethics')}
-            className={`flex-1 py-3 px-4 rounded-xl font-medium transition flex items-center justify-center gap-2 ${
-              caseType === 'ethics'
-                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200'
-                : 'text-gray-500 hover:bg-gray-50'
-            }`}
-          >
-            <Scale className="w-5 h-5" />
-            윤리 ({ethicsCount})
-          </button>
-        </div>
-
-        {/* 기출/예상 소스 필터 (전공일 때만) */}
-        {caseType === 'major' && (
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-white rounded-xl p-1 shadow-sm border border-gray-200 flex gap-1">
-                <button
-                  onClick={() => setSourceFilter('exam')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                    sourceFilter === 'exam'
-                      ? 'bg-blue-500 text-white shadow'
-                      : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  📚 기출 ({majorExamCount})
-                </button>
-                <button
-                  onClick={() => setSourceFilter('predicted')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                    sourceFilter === 'predicted'
-                      ? 'bg-violet-500 text-white shadow'
-                      : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  🔮 예상 ({majorPredictedCount})
-                </button>
-                <button
-                  onClick={() => setSourceFilter('all')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                    sourceFilter === 'all'
-                      ? 'bg-gray-700 text-white shadow'
-                      : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  전체
-                </button>
-              </div>
+        {/* 통합 필터 카드 */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6">
+          {/* 상단: 전공/윤리 + 관리 버튼 */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+              <button
+                onClick={() => setCaseType('major')}
+                className={`py-2 px-5 rounded-lg font-medium transition flex items-center gap-2 ${
+                  caseType === 'major'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                전공
+              </button>
+              <button
+                onClick={() => setCaseType('ethics')}
+                className={`py-2 px-5 rounded-lg font-medium transition flex items-center gap-2 ${
+                  caseType === 'ethics'
+                    ? 'bg-white text-emerald-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Scale className="w-4 h-4" />
+                윤리
+              </button>
             </div>
-            <Link
-              href="/interview/admin"
-              className="flex items-center gap-2 text-sm text-gray-500 hover:text-violet-600 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm hover:border-violet-300 transition"
-            >
-              <Settings className="w-4 h-4" />
-              관리
-            </Link>
+            {caseType === 'major' && (
+              <Link
+                href="/interview/admin"
+                className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-violet-600 transition"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                관리
+              </Link>
+            )}
           </div>
-        )}
 
-        {/* 카테고리 필터 */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {currentCategories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition border ${
-                selectedCategory === cat
-                  ? caseType === 'major'
-                    ? 'bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-200'
-                    : 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-200'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+          {/* 기출/예상 필터 (전공일 때만) */}
+          {caseType === 'major' && (
+            <div className="flex gap-2 mb-3 pb-3 border-b border-gray-100">
+              <button
+                onClick={() => setSourceFilter('exam')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                  sourceFilter === 'exam'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                📚 기출 ({majorExamCount})
+              </button>
+              <button
+                onClick={() => setSourceFilter('predicted')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                  sourceFilter === 'predicted'
+                    ? 'bg-violet-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                🔮 예상 ({majorPredictedCount})
+              </button>
+              <button
+                onClick={() => setSourceFilter('all')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                  sourceFilter === 'all'
+                    ? 'bg-gray-700 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                전체 ({majorExamCount + majorPredictedCount})
+              </button>
+            </div>
+          )}
+
+          {/* 카테고리 필터 */}
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {currentCategories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition ${
+                  selectedCategory === cat
+                    ? caseType === 'major'
+                      ? 'bg-blue-100 text-blue-700 font-medium'
+                      : 'bg-emerald-100 text-emerald-700 font-medium'
+                    : 'text-gray-500 hover:bg-gray-100'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* 컨트롤 바 */}
