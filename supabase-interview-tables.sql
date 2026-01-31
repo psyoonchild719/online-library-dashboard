@@ -32,10 +32,10 @@ CREATE TABLE IF NOT EXISTS interview_questions (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. 연습 기록 테이블
+-- 3. 연습 기록 테이블 (member_id는 UUID 타입)
 CREATE TABLE IF NOT EXISTS interview_logs (
   id SERIAL PRIMARY KEY,
-  member_id INTEGER REFERENCES members(id) ON DELETE CASCADE,
+  member_id UUID REFERENCES members(id) ON DELETE CASCADE,
   case_id INTEGER REFERENCES interview_cases(id) ON DELETE CASCADE,
   question_id INTEGER REFERENCES interview_questions(id) ON DELETE CASCADE,
   user_answer TEXT,

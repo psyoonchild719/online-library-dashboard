@@ -7,7 +7,7 @@ import {
   Eye, EyeOff, Clock, RotateCcw, Home, LogIn, LogOut,
   CheckCircle, AlertCircle, Shuffle, Filter, X
 } from 'lucide-react';
-import { majorCases, ethicsCases, majorCategories, ethicsCategories } from '../../data/cases';
+import { majorCases, ethicsCases, majorCategories, ethicsCategories, predictedCases } from '../../data/cases';
 
 // Supabase 클라이언트 설정
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -40,9 +40,13 @@ export default function InterviewSimulator() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [practiceLog, setPracticeLog] = useState([]);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [includePredicted, setIncludePredicted] = useState(false); // 예상문제 포함 여부
 
-  // 현재 유형의 사례 및 카테고리 목록
-  const currentCases = caseType === 'major' ? majorCases : ethicsCases;
+  // 현재 유형의 사례 및 카테고리 목록 (예상문제는 전공만 해당)
+  const baseCases = caseType === 'major' ? majorCases : ethicsCases;
+  const currentCases = caseType === 'major' && includePredicted
+    ? [...baseCases, ...predictedCases]
+    : baseCases;
   const currentCategories = caseType === 'major' ? majorCategories : ethicsCategories;
 
   // 필터링된 사례 목록
@@ -232,7 +236,7 @@ export default function InterviewSimulator() {
 
       <main className="max-w-6xl mx-auto px-4 py-6">
         {/* 유형 선택 탭 */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-4">
           <button
             onClick={() => setCaseType('major')}
             className={`flex-1 py-3 px-4 rounded-xl font-medium transition flex items-center justify-center gap-2 ${
@@ -242,7 +246,7 @@ export default function InterviewSimulator() {
             }`}
           >
             <BookOpen className="w-5 h-5" />
-            전공 ({majorCases.length})
+            전공 ({includePredicted ? majorCases.length + predictedCases.length : majorCases.length})
           </button>
           <button
             onClick={() => setCaseType('ethics')}
@@ -256,6 +260,27 @@ export default function InterviewSimulator() {
             윤리 ({ethicsCases.length})
           </button>
         </div>
+
+        {/* 예상문제 포함 토글 (전공일 때만) */}
+        {caseType === 'major' && (
+          <div className="flex items-center justify-end gap-2 mb-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={includePredicted}
+                onChange={(e) => {
+                  setIncludePredicted(e.target.checked);
+                  setCurrentCaseIndex(0);
+                  setCurrentQuestionIndex(0);
+                }}
+                className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500"
+              />
+              <span className="text-sm text-gray-300">
+                🔮 DSM-5-TR 예상문제 포함 (+{predictedCases.length}건)
+              </span>
+            </label>
+          </div>
+        )}
 
         {/* 카테고리 필터 */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
