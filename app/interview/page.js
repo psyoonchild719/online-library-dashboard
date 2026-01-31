@@ -561,56 +561,63 @@ export default function InterviewSimulator() {
           <>
             {/* 사례 카드 */}
             <div className="bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
-              {/* 사례 헤더 */}
-              <div className="p-5 border-b border-gray-100 flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                      caseType === 'major'
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                        : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                    }`}>
-                      {currentCase.category}
-                    </span>
-                    {currentCase.source === 'predicted' && (
-                      <span className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 border border-violet-200 font-medium">
-                        🔮 예상
+              {/* 사례 헤더 - 답안 확인 후 정보 공개 */}
+              <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-500">
+                    사례 {currentCaseIndex + 1}
+                  </span>
+                  {showAnswer && (
+                    <>
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                        caseType === 'major'
+                          ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                          : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                      }`}>
+                        {currentCase.category}
                       </span>
-                    )}
-                    {currentCase.years?.filter(y => y !== '예상').map(year => (
-                      <span key={year} className="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded-full">
-                        {year}
-                      </span>
-                    ))}
-                  </div>
-                  <h2 className="text-lg font-bold text-gray-800">{currentCase.title}</h2>
-                  {currentCase.diagnosis && (
-                    <p className="text-sm mt-1">
-                      <span className="font-medium text-gray-600">진단:</span>{' '}
-                      {showAnswer ? (
-                        <span className="text-gray-500">{currentCase.diagnosis}</span>
-                      ) : (
-                        <span className="text-gray-400 italic">답안 확인 후 공개</span>
+                      {currentCase.source === 'predicted' && (
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 border border-violet-200 font-medium">
+                          🔮 예상
+                        </span>
                       )}
-                    </p>
-                  )}
-                  {currentCase.topic && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      <span className="font-medium text-gray-600">주제:</span> {currentCase.topic}
-                    </p>
+                      {currentCase.years?.filter(y => y !== '예상').map(year => (
+                        <span key={year} className="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded-full">
+                          {year}
+                        </span>
+                      ))}
+                    </>
                   )}
                 </div>
                 <button
                   onClick={() => setShowCase(!showCase)}
-                  className="p-2 bg-gray-50 rounded-lg text-gray-500 hover:bg-gray-100 transition ml-4"
+                  className="p-2 bg-gray-50 rounded-lg text-gray-500 hover:bg-gray-100 transition"
+                  title={showCase ? '사례 숨기기' : '사례 보기'}
                 >
-                  {showCase ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showCase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
-              {/* 사례 내용 */}
+              {/* 답안 확인 후 제목/진단 공개 */}
+              {showAnswer && (
+                <div className="px-5 pt-4 pb-2 bg-amber-50 border-b border-amber-100">
+                  <h2 className="text-lg font-bold text-gray-800 mb-1">{currentCase.title}</h2>
+                  {currentCase.diagnosis && (
+                    <p className="text-sm text-amber-700">
+                      <span className="font-medium">진단:</span> {currentCase.diagnosis}
+                    </p>
+                  )}
+                  {currentCase.topic && (
+                    <p className="text-sm text-amber-700">
+                      <span className="font-medium">주제:</span> {currentCase.topic}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* 사례 내용 - 항상 표시 가능 */}
               {showCase && (
-                <div className="p-5 bg-gray-50 border-t border-gray-100">
+                <div className="p-5">
                   <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {currentCase.caseText}
                   </p>
