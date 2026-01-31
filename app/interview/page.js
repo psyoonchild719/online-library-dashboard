@@ -9,9 +9,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-// Fallback: 하드코딩된 데이터 (DB 실패 시 사용)
-import { majorCases, ethicsCases, majorCategories, ethicsCategories, predictedCases } from '../../data/cases';
-
 // Supabase 클라이언트 설정
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -34,9 +31,9 @@ export default function InterviewSimulator() {
   const [authLoading, setAuthLoading] = useState(true);
 
   // DB 상태
-  const [useDatabase, setUseDatabase] = useState(true);
   const [dbCases, setDbCases] = useState({ major: [], ethics: [] });
   const [dbLoading, setDbLoading] = useState(true);
+  const [dbError, setDbError] = useState(null);
 
   // 시뮬레이터 상태
   const [caseType, setCaseType] = useState('major');
@@ -96,54 +93,44 @@ export default function InterviewSimulator() {
       });
 
       setDbCases({ major: majorList, ethics: ethicsList });
+      setDbError(null);
     } catch (error) {
       console.error('DB 로드 실패:', error);
-      setUseDatabase(false);
+      setDbError('데이터를 불러오지 못했습니다.');
     } finally {
       setDbLoading(false);
     }
   }, []);
 
-  // 탭별 카운트 (독립적으로 계산)
-  const useDb = useDatabase && (dbCases.major.length > 0 || dbCases.ethics.length > 0);
-  const majorExamCount = useDb
-    ? dbCases.major.filter(c => c.source === 'exam').length
-    : majorCases.length;
-  const majorPredictedCount = useDb
-    ? dbCases.major.filter(c => c.source === 'predicted').length
-    : predictedCases.length;
-  const ethicsCount = useDb ? dbCases.ethics.length : ethicsCases.length;
+  // 탭별 카운트 (DB 전용)
+  const majorExamCount = dbCases.major.filter(c => c.source === 'exam').length;
+  const majorPredictedCount = dbCases.major.filter(c => c.source === 'predicted').length;
+  const ethicsCount = dbCases.ethics.length;
 
-  // 현재 사용할 데이터 소스 결정
+  // 현재 사용할 데이터 소스 결정 (DB 전용)
   const getDataSource = () => {
     if (caseType === 'ethics') {
-      return useDb ? dbCases.ethics : ethicsCases;
+      return dbCases.ethics;
     }
 
     // 전공의 경우 sourceFilter에 따라 필터링
-    if (useDb) {
-      const allMajor = dbCases.major;
-      if (sourceFilter === 'exam') return allMajor.filter(c => c.source === 'exam');
-      if (sourceFilter === 'predicted') return allMajor.filter(c => c.source === 'predicted');
-      return allMajor; // 'all'
-    } else {
-      if (sourceFilter === 'exam') return majorCases;
-      if (sourceFilter === 'predicted') return predictedCases;
-      return [...majorCases, ...predictedCases]; // 'all'
-    }
+    const allMajor = dbCases.major;
+    if (sourceFilter === 'exam') return allMajor.filter(c => c.source === 'exam');
+    if (sourceFilter === 'predicted') return allMajor.filter(c => c.source === 'predicted');
+    return allMajor; // 'all'
   };
 
   const currentCases = getDataSource();
 
+  // 카테고리 정렬 순서
+  const categoryOrder = ['강박/정신증', '우울/불안', '외상/스트레스', '성격장애', '신경발달',
+                         '신체증상', '꾀병', '섭식장애', '해리장애', '물질관련', '신경인지', '충동조절',
+                         '비밀유지/기록', '검사보안/평가', '다중관계', '신고의무', '동료윤리', '전문성', '무자격자', '동의/정보', '연구윤리'];
+
   // 현재 데이터 소스에서 카테고리 동적 추출
   const currentCategories = (() => {
-    if (caseType === 'ethics') return ethicsCategories;
-
     const categories = [...new Set(currentCases.map(c => c.category))];
-    // 정렬 순서 유지
-    const order = ['강박/정신증', '우울/불안', '외상/스트레스', '성격장애', '신경발달',
-                   '신체증상', '꾀병', '섭식장애', '해리장애', '물질관련', '신경인지', '충동조절'];
-    categories.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    categories.sort((a, b) => categoryOrder.indexOf(a) - categoryOrder.indexOf(b));
     return ['전체', ...categories];
   })();
 
@@ -390,14 +377,17 @@ export default function InterviewSimulator() {
               <h1 className="text-lg font-bold text-gray-800">면접 시뮬레이터</h1>
             </div>
             {/* DB 상태 표시 */}
-            <span className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
-              useDb && !dbLoading
-                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                : 'bg-amber-50 text-amber-600 border border-amber-200'
-            }`}>
-              <Database className="w-3 h-3" />
-              {dbLoading ? '로딩' : useDb ? 'DB' : '파일'}
-            </span>
+            {dbLoading ? (
+              <span className="text-xs px-2 py-1 rounded-full flex items-center gap-1 bg-amber-50 text-amber-600 border border-amber-200">
+                <Database className="w-3 h-3" />
+                로딩
+              </span>
+            ) : dbError ? (
+              <span className="text-xs px-2 py-1 rounded-full flex items-center gap-1 bg-red-50 text-red-600 border border-red-200">
+                <AlertCircle className="w-3 h-3" />
+                오류
+              </span>
+            ) : null}
           </div>
           <div className="flex items-center gap-3">
             {/* 오늘 연습 횟수 */}
