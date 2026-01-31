@@ -22,9 +22,15 @@ const ALLOWED_MEMBERS = {
 };
 
 // 카테고리 옵션
-const CATEGORIES = [
+// 전공 카테고리
+const MAJOR_CATEGORIES = [
   '강박/정신증', '우울/불안', '외상/스트레스', '성격장애', '신경발달',
   '신체증상', '꾀병', '섭식장애', '해리장애', '물질관련', '신경인지', '충동조절'
+];
+
+// 윤리 카테고리
+const ETHICS_CATEGORIES = [
+  '비밀유지/기록', '검사보안/평가', '다중관계', '신고의무', '동료윤리', '전문성', '무자격자', '동의/정보', '연구윤리'
 ];
 
 export default function AdminPage() {
@@ -39,9 +45,13 @@ export default function AdminPage() {
   const [showAddQuestion, setShowAddQuestion] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  // 필터 상태
+  const [caseType, setCaseType] = useState('major'); // 'major' | 'ethics'
+  const [sourceFilter, setSourceFilter] = useState('all'); // 'exam' | 'predicted' | 'all'
+
   // 새 사례 폼
   const [newCase, setNewCase] = useState({
-    title: '', category: '우울/불안', diagnosis: '', case_text: ''
+    title: '', category: '우울/불안', diagnosis: '', topic: '', case_text: '', source: 'predicted', type: 'major'
   });
 
   // 새 질문 폼
@@ -68,16 +78,22 @@ export default function AdminPage() {
     if (user && ALLOWED_MEMBERS[user.email]) {
       loadCases();
     }
-  }, [user]);
+  }, [user, caseType, sourceFilter]);
 
   const loadCases = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('interview_cases')
         .select(`*, interview_questions (*)`)
-        .eq('source', 'predicted')
+        .eq('type', caseType)
         .order('id', { ascending: false });
+
+      if (sourceFilter !== 'all') {
+        query = query.eq('source', sourceFilter);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setCases(data || []);
@@ -98,19 +114,33 @@ export default function AdminPage() {
 
     setSaving(true);
     try {
-      const { error } = await supabase.from('interview_cases').insert({
-        type: 'major',
+      // 연도 파싱 (쉼표로 구분된 문자열 → 배열)
+      let yearsArray = ['예상'];
+      if (newCase.source === 'exam' && newCase.years) {
+        yearsArray = newCase.years.split(',').map(y => y.trim()).filter(y => y);
+      }
+
+      const insertData = {
+        type: newCase.type,
         title: newCase.title,
         category: newCase.category,
-        diagnosis: newCase.diagnosis || null,
         case_text: newCase.case_text,
-        years: ['예상'],
-        source: 'predicted'
-      });
+        years: yearsArray,
+        source: newCase.source
+      };
+
+      // 전공이면 diagnosis, 윤리면 topic
+      if (newCase.type === 'major') {
+        insertData.diagnosis = newCase.diagnosis || null;
+      } else {
+        insertData.topic = newCase.topic || null;
+      }
+
+      const { error } = await supabase.from('interview_cases').insert(insertData);
 
       if (error) throw error;
 
-      setNewCase({ title: '', category: '우울/불안', diagnosis: '', case_text: '' });
+      setNewCase({ title: '', category: caseType === 'major' ? '우울/불안' : '비밀유지/기록', diagnosis: '', topic: '', case_text: '', source: 'predicted', type: caseType, years: '' });
       setShowAddCase(false);
       loadCases();
     } catch (error) {
@@ -299,7 +329,7 @@ export default function AdminPage() {
               <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
                 <Brain className="w-4 h-4 text-violet-600" />
               </div>
-              <h1 className="text-lg font-bold text-gray-800">예상문제 관리</h1>
+              <h1 className="text-lg font-bold text-gray-800">사례 관리</h1>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -321,11 +351,76 @@ export default function AdminPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6">
+        {/* 필터 탭 */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6">
+          {/* 전공/윤리 탭 */}
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => { setCaseType('major'); setSourceFilter('all'); }}
+              className={`px-4 py-2 rounded-lg font-medium transition ${
+                caseType === 'major' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              전공
+            </button>
+            <button
+              onClick={() => { setCaseType('ethics'); setSourceFilter('all'); }}
+              className={`px-4 py-2 rounded-lg font-medium transition ${
+                caseType === 'ethics' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              윤리
+            </button>
+          </div>
+          {/* 기출/예상 필터 */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSourceFilter('all')}
+              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                sourceFilter === 'all' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              전체 ({cases.length})
+            </button>
+            <button
+              onClick={() => setSourceFilter('exam')}
+              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                sourceFilter === 'exam' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              📚 기출
+            </button>
+            <button
+              onClick={() => setSourceFilter('predicted')}
+              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                sourceFilter === 'predicted' ? 'bg-violet-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              🔮 예상
+            </button>
+          </div>
+        </div>
+
         {/* 상단 액션 */}
         <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-600">총 <span className="font-bold text-indigo-600">{cases.length}</span>개 예상문제</p>
+          <p className="text-gray-600">
+            {caseType === 'major' ? '전공' : '윤리'} · {sourceFilter === 'all' ? '전체' : sourceFilter === 'exam' ? '기출' : '예상'}
+            <span className="font-bold text-indigo-600 ml-1">{cases.length}</span>개
+          </p>
           <button
-            onClick={() => setShowAddCase(true)}
+            onClick={() => {
+              setNewCase({
+                title: '',
+                category: caseType === 'major' ? '우울/불안' : '비밀유지/기록',
+                diagnosis: '',
+                topic: '',
+                case_text: '',
+                source: 'predicted',
+                type: caseType,
+                years: ''
+              });
+              setShowAddCase(true);
+            }}
             className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-indigo-700 transition shadow-lg shadow-indigo-200"
           >
             <Plus className="w-5 h-5" />
@@ -336,8 +431,52 @@ export default function AdminPage() {
         {/* 새 사례 추가 폼 */}
         {showAddCase && (
           <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4 shadow-sm">
-            <h3 className="font-bold text-gray-800 mb-4">새 예상문제 추가</h3>
+            <h3 className="font-bold text-gray-800 mb-4">
+              새 {newCase.type === 'major' ? '전공' : '윤리'} 사례 추가
+            </h3>
             <div className="space-y-4">
+              {/* 유형 및 소스 선택 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">유형</label>
+                  <select
+                    value={newCase.type}
+                    onChange={(e) => setNewCase({
+                      ...newCase,
+                      type: e.target.value,
+                      category: e.target.value === 'major' ? '우울/불안' : '비밀유지/기록'
+                    })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="major">전공</option>
+                    <option value="ethics">윤리</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">구분</label>
+                  <select
+                    value={newCase.source}
+                    onChange={(e) => setNewCase({ ...newCase, source: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="exam">📚 기출</option>
+                    <option value="predicted">🔮 예상</option>
+                  </select>
+                </div>
+              </div>
+              {/* 기출인 경우 연도 입력 */}
+              {newCase.source === 'exam' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">출제 연도 (쉼표로 구분)</label>
+                  <input
+                    type="text"
+                    value={newCase.years || ''}
+                    onChange={(e) => setNewCase({ ...newCase, years: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    placeholder="예: 2018, 2019, 2021"
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">제목 *</label>
                 <input
@@ -356,19 +495,24 @@ export default function AdminPage() {
                     onChange={(e) => setNewCase({ ...newCase, category: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
                   >
-                    {CATEGORIES.map(cat => (
+                    {(newCase.type === 'major' ? MAJOR_CATEGORIES : ETHICS_CATEGORIES).map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">진단</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {newCase.type === 'major' ? '진단' : '주제'}
+                  </label>
                   <input
                     type="text"
-                    value={newCase.diagnosis}
-                    onChange={(e) => setNewCase({ ...newCase, diagnosis: e.target.value })}
+                    value={newCase.type === 'major' ? newCase.diagnosis : newCase.topic}
+                    onChange={(e) => setNewCase({
+                      ...newCase,
+                      [newCase.type === 'major' ? 'diagnosis' : 'topic']: e.target.value
+                    })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    placeholder="예: 신경성 식욕부진증"
+                    placeholder={newCase.type === 'major' ? '예: 신경성 식욕부진증' : '예: 다중관계'}
                   />
                 </div>
               </div>
