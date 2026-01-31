@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
   BookOpen, Brain, Scale, ChevronRight, ChevronLeft,
   Eye, EyeOff, Clock, RotateCcw, Home, LogIn, LogOut,
-  CheckCircle, AlertCircle, Shuffle, Database, RefreshCw
+  CheckCircle, AlertCircle, Shuffle, Database
 } from 'lucide-react';
 
 // Fallback: 하드코딩된 데이터 (DB 실패 시 사용)
@@ -93,7 +93,6 @@ export default function InterviewSimulator() {
       });
 
       setDbCases({ major: majorList, ethics: ethicsList });
-      console.log(`DB 로드 완료: 전공 ${majorList.length}건, 윤리 ${ethicsList.length}건`);
     } catch (error) {
       console.error('DB 로드 실패:', error);
       setUseDatabase(false);
@@ -300,8 +299,8 @@ export default function InterviewSimulator() {
   // 로딩 화면
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">로딩 중...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600 text-lg">로딩 중...</div>
       </div>
     );
   }
@@ -309,14 +308,16 @@ export default function InterviewSimulator() {
   // 로그인 필요 화면
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 max-w-md w-full text-center border border-white/20">
-          <Brain className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">면접 시뮬레이터</h1>
-          <p className="text-gray-300 mb-6">임상심리전문가 자격시험 면접 연습</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100">
+          <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Brain className="w-8 h-8 text-indigo-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">면접 시뮬레이터</h1>
+          <p className="text-gray-500 mb-6">임상심리전문가 자격시험 면접 연습</p>
           <button
             onClick={signInWithGoogle}
-            className="w-full bg-white text-gray-800 py-3 px-4 rounded-xl font-medium hover:bg-gray-100 transition flex items-center justify-center gap-2"
+            className="w-full bg-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-200"
           >
             <LogIn className="w-5 h-5" />
             Google로 로그인
@@ -329,15 +330,17 @@ export default function InterviewSimulator() {
   // 비허용 사용자 화면
   if (!isAllowed) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 max-w-md w-full text-center border border-white/20">
-          <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">접근 권한 없음</h2>
-          <p className="text-gray-300 mb-4">스터디 멤버만 이용 가능합니다.</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">접근 권한 없음</h2>
+          <p className="text-gray-500 mb-4">스터디 멤버만 이용 가능합니다.</p>
           <p className="text-gray-400 text-sm mb-6">{user.email}</p>
           <button
             onClick={signOut}
-            className="bg-red-500/20 text-red-300 py-2 px-4 rounded-lg hover:bg-red-500/30 transition"
+            className="bg-gray-100 text-gray-600 py-2 px-6 rounded-lg hover:bg-gray-200 transition font-medium"
           >
             로그아웃
           </button>
@@ -347,44 +350,48 @@ export default function InterviewSimulator() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
-      <header className="bg-black/30 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <a href="/" className="text-gray-400 hover:text-white transition">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <a href="/" className="text-gray-400 hover:text-gray-600 transition p-1">
               <Home className="w-5 h-5" />
             </a>
-            <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Brain className="w-5 h-5 text-purple-400" />
-              면접 시뮬레이터
-            </h1>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <Brain className="w-4 h-4 text-indigo-600" />
+              </div>
+              <h1 className="text-lg font-bold text-gray-800">면접 시뮬레이터</h1>
+            </div>
             {/* DB 상태 표시 */}
             <span className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
-              useDatabase && !dbLoading ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'
+              useDb && !dbLoading
+                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                : 'bg-amber-50 text-amber-600 border border-amber-200'
             }`}>
               <Database className="w-3 h-3" />
-              {dbLoading ? '로딩' : useDatabase ? 'DB' : '파일'}
+              {dbLoading ? '로딩' : useDb ? 'DB' : '파일'}
             </span>
           </div>
           <div className="flex items-center gap-3">
             {/* 오늘 연습 횟수 */}
-            <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full">
-              오늘 {practiceCount}건 연습
+            <span className="text-xs bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-full font-medium border border-indigo-100">
+              오늘 {practiceCount}건
             </span>
-            <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg">
+            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
               <img
                 src={user.user_metadata?.avatar_url || '/default-avatar.png'}
                 alt="프로필"
                 className="w-6 h-6 rounded-full"
               />
-              <span className="text-sm text-gray-300 font-medium">
+              <span className="text-sm text-gray-700 font-medium">
                 {ALLOWED_MEMBERS[user.email]?.name}
               </span>
             </div>
             <button
               onClick={signOut}
-              className="text-gray-400 hover:text-white transition"
+              className="text-gray-400 hover:text-gray-600 transition p-1"
               title="로그아웃"
             >
               <LogOut className="w-5 h-5" />
@@ -393,15 +400,15 @@ export default function InterviewSimulator() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="max-w-4xl mx-auto px-4 py-6">
         {/* 유형 선택 탭 */}
-        <div className="flex gap-2 mb-4">
+        <div className="bg-white rounded-2xl p-1.5 shadow-sm border border-gray-200 flex gap-1 mb-4">
           <button
             onClick={() => setCaseType('major')}
             className={`flex-1 py-3 px-4 rounded-xl font-medium transition flex items-center justify-center gap-2 ${
               caseType === 'major'
-                ? 'bg-blue-500 text-white'
-                : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                ? 'bg-blue-500 text-white shadow-lg shadow-blue-200'
+                : 'text-gray-500 hover:bg-gray-50'
             }`}
           >
             <BookOpen className="w-5 h-5" />
@@ -411,8 +418,8 @@ export default function InterviewSimulator() {
             onClick={() => setCaseType('ethics')}
             className={`flex-1 py-3 px-4 rounded-xl font-medium transition flex items-center justify-center gap-2 ${
               caseType === 'ethics'
-                ? 'bg-green-500 text-white'
-                : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200'
+                : 'text-gray-500 hover:bg-gray-50'
             }`}
           >
             <Scale className="w-5 h-5" />
@@ -423,15 +430,15 @@ export default function InterviewSimulator() {
         {/* 예상문제 포함 토글 (전공일 때만) */}
         {caseType === 'major' && (
           <div className="flex items-center justify-end gap-2 mb-4">
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
               <input
                 type="checkbox"
                 checked={includePredicted}
                 onChange={(e) => setIncludePredicted(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500"
+                className="w-4 h-4 rounded border-gray-300 text-violet-500 focus:ring-violet-500"
               />
-              <span className="text-sm text-gray-300">
-                🔮 DSM-5-TR 예상문제 포함 (+{majorPredictedCount}건)
+              <span className="text-sm text-gray-600">
+                🔮 예상문제 포함 <span className="text-violet-500 font-medium">+{majorPredictedCount}</span>
               </span>
             </label>
           </div>
@@ -443,10 +450,12 @@ export default function InterviewSimulator() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition border ${
                 selectedCategory === cat
-                  ? caseType === 'major' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                  ? caseType === 'major'
+                    ? 'bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-200'
+                    : 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-200'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
             >
               {cat}
@@ -457,12 +466,12 @@ export default function InterviewSimulator() {
         {/* 컨트롤 바 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">
+            <span className="text-gray-500 text-sm font-medium bg-white px-3 py-1.5 rounded-lg border border-gray-200">
               {currentCaseIndex + 1} / {filteredCases.length}
             </span>
             <button
               onClick={randomCase}
-              className="p-2 bg-white/10 rounded-lg text-gray-300 hover:bg-white/20 transition"
+              className="p-2 bg-white rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition border border-gray-200"
               title="랜덤 사례"
             >
               <Shuffle className="w-4 h-4" />
@@ -471,8 +480,10 @@ export default function InterviewSimulator() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsTimerRunning(!isTimerRunning)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1 ${
-                isTimerRunning ? 'bg-red-500/20 text-red-300' : 'bg-white/10 text-gray-300'
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 border ${
+                isTimerRunning
+                  ? 'bg-rose-50 text-rose-600 border-rose-200'
+                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
               }`}
             >
               <Clock className="w-4 h-4" />
@@ -480,7 +491,7 @@ export default function InterviewSimulator() {
             </button>
             <button
               onClick={() => setTimer(0)}
-              className="p-2 bg-white/10 rounded-lg text-gray-300 hover:bg-white/20 transition"
+              className="p-2 bg-white rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition border border-gray-200"
               title="타이머 리셋"
             >
               <RotateCcw className="w-4 h-4" />
@@ -491,49 +502,53 @@ export default function InterviewSimulator() {
         {currentCase ? (
           <>
             {/* 사례 카드 */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 mb-4 overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
               {/* 사례 헤더 */}
-              <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                <div>
+              <div className="p-5 border-b border-gray-100 flex items-start justify-between">
+                <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      caseType === 'major' ? 'bg-blue-500/30 text-blue-300' : 'bg-green-500/30 text-green-300'
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                      caseType === 'major'
+                        ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                        : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                     }`}>
                       {currentCase.category}
                     </span>
                     {currentCase.source === 'predicted' && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-purple-500/30 text-purple-300">
+                      <span className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-600 border border-violet-200 font-medium">
                         🔮 예상
                       </span>
                     )}
+                    {currentCase.years?.map(year => (
+                      <span key={year} className="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded-full">
+                        {year}
+                      </span>
+                    ))}
                   </div>
-                  <h2 className="text-lg font-bold text-white">{currentCase.title}</h2>
+                  <h2 className="text-lg font-bold text-gray-800">{currentCase.title}</h2>
                   {currentCase.diagnosis && (
-                    <p className="text-sm text-gray-400 mt-1">진단: {currentCase.diagnosis}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      <span className="font-medium text-gray-600">진단:</span> {currentCase.diagnosis}
+                    </p>
                   )}
                   {currentCase.topic && (
-                    <p className="text-sm text-gray-400 mt-1">주제: {currentCase.topic}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      <span className="font-medium text-gray-600">주제:</span> {currentCase.topic}
+                    </p>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  {currentCase.years?.map(year => (
-                    <span key={year} className="text-xs px-2 py-1 bg-purple-500/30 text-purple-300 rounded">
-                      {year}
-                    </span>
-                  ))}
-                  <button
-                    onClick={() => setShowCase(!showCase)}
-                    className="p-2 bg-white/10 rounded-lg text-gray-300 hover:bg-white/20 transition"
-                  >
-                    {showCase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+                <button
+                  onClick={() => setShowCase(!showCase)}
+                  className="p-2 bg-gray-50 rounded-lg text-gray-500 hover:bg-gray-100 transition ml-4"
+                >
+                  {showCase ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
 
               {/* 사례 내용 */}
               {showCase && (
-                <div className="p-4 bg-black/20">
-                  <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">
+                <div className="p-5 bg-gray-50 border-t border-gray-100">
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {currentCase.caseText}
                   </p>
                 </div>
@@ -542,60 +557,63 @@ export default function InterviewSimulator() {
 
             {/* 질문 카드 */}
             {currentQuestion && (
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-4 mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-400">
+              <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm text-gray-500 font-medium">
                     질문 {currentQuestionIndex + 1} / {currentCase.questions.length}
                   </span>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <button
                       onClick={prevQuestion}
                       disabled={currentQuestionIndex === 0}
-                      className="p-1.5 bg-white/10 rounded-lg text-gray-300 hover:bg-white/20 transition disabled:opacity-30"
+                      className="p-2 bg-gray-50 rounded-lg text-gray-500 hover:bg-gray-100 transition disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
                     <button
                       onClick={nextQuestion}
                       disabled={currentQuestionIndex === currentCase.questions.length - 1}
-                      className="p-1.5 bg-white/10 rounded-lg text-gray-300 hover:bg-white/20 transition disabled:opacity-30"
+                      className="p-2 bg-gray-50 rounded-lg text-gray-500 hover:bg-gray-100 transition disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
-                <p className="text-white text-lg font-medium mb-4">{currentQuestion.q}</p>
+                <p className="text-gray-800 text-lg font-medium mb-5 leading-relaxed">{currentQuestion.q}</p>
 
                 <button
                   onClick={() => setShowAnswer(!showAnswer)}
-                  className={`w-full py-3 rounded-xl font-medium transition ${
+                  className={`w-full py-3.5 rounded-xl font-medium transition ${
                     showAnswer
-                      ? 'bg-yellow-500/20 text-yellow-300'
-                      : 'bg-purple-500 text-white hover:bg-purple-600'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200'
                   }`}
                 >
                   {showAnswer ? '핵심 포인트 숨기기' : '핵심 포인트 보기'}
                 </button>
 
                 {showAnswer && currentQuestion.keyPoints && (
-                  <div className="mt-4 p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/30">
-                    <h4 className="text-yellow-300 font-medium mb-2 flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4" />
+                  <div className="mt-5 p-5 bg-amber-50 rounded-xl border border-amber-200">
+                    <h4 className="text-amber-800 font-semibold mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
                       핵심 포인트
                     </h4>
-                    <ul className="space-y-2">
+                    <ul className="space-y-2.5">
                       {currentQuestion.keyPoints.map((point, idx) => (
-                        <li key={idx} className="text-gray-200 flex items-start gap-2">
-                          <span className="text-yellow-400">•</span>
-                          {point}
+                        <li key={idx} className="text-gray-700 flex items-start gap-2">
+                          <span className="text-amber-500 mt-1">•</span>
+                          <span>{point}</span>
                         </li>
                       ))}
                     </ul>
                     {currentQuestion.tip && (
-                      <p className="mt-3 text-sm text-purple-300 italic">
-                        💡 Tip: {currentQuestion.tip}
-                      </p>
+                      <div className="mt-4 pt-4 border-t border-amber-200">
+                        <p className="text-sm text-violet-700 flex items-start gap-2">
+                          <span>💡</span>
+                          <span><strong>Tip:</strong> {currentQuestion.tip}</span>
+                        </p>
+                      </div>
                     )}
                   </div>
                 )}
@@ -603,11 +621,11 @@ export default function InterviewSimulator() {
             )}
 
             {/* 네비게이션 */}
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <button
                 onClick={prevCase}
                 disabled={currentCaseIndex === 0}
-                className="flex-1 py-3 bg-white/10 rounded-xl text-gray-300 font-medium hover:bg-white/20 transition disabled:opacity-30 flex items-center justify-center gap-2"
+                className="flex-1 py-3.5 bg-white rounded-xl text-gray-600 font-medium hover:bg-gray-50 transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-gray-200 shadow-sm"
               >
                 <ChevronLeft className="w-5 h-5" />
                 이전 사례
@@ -615,7 +633,7 @@ export default function InterviewSimulator() {
               <button
                 onClick={nextCase}
                 disabled={currentCaseIndex === filteredCases.length - 1}
-                className="flex-1 py-3 bg-white/10 rounded-xl text-gray-300 font-medium hover:bg-white/20 transition disabled:opacity-30 flex items-center justify-center gap-2"
+                className="flex-1 py-3.5 bg-white rounded-xl text-gray-600 font-medium hover:bg-gray-50 transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-gray-200 shadow-sm"
               >
                 다음 사례
                 <ChevronRight className="w-5 h-5" />
@@ -623,9 +641,11 @@ export default function InterviewSimulator() {
             </div>
           </>
         ) : (
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-8 text-center">
-            <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-300">해당 카테고리에 사례가 없습니다.</p>
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-600 font-medium">해당 카테고리에 사례가 없습니다.</p>
             {dbLoading && (
               <p className="text-gray-400 text-sm mt-2">데이터 로딩 중...</p>
             )}
