@@ -303,8 +303,13 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">{user.email}</span>
-            <button onClick={signOut} className="text-gray-400 hover:text-gray-600 transition p-1">
+            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+              <span className="text-lg">{ALLOWED_MEMBERS[user.email]?.avatar}</span>
+              <span className="text-sm text-gray-700 font-medium">
+                {ALLOWED_MEMBERS[user.email]?.name}
+              </span>
+            </div>
+            <button onClick={signOut} className="text-gray-400 hover:text-gray-600 transition p-1" title="로그아웃">
               <LogOut className="w-5 h-5" />
             </button>
           </div>
