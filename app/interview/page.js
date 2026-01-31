@@ -102,28 +102,37 @@ export default function InterviewSimulator() {
     }
   }, []);
 
+  // 탭별 카운트 (독립적으로 계산)
+  const useDb = useDatabase && (dbCases.major.length > 0 || dbCases.ethics.length > 0);
+  const majorExamCount = useDb
+    ? dbCases.major.filter(c => c.source === 'exam').length
+    : majorCases.length;
+  const majorPredictedCount = useDb
+    ? dbCases.major.filter(c => c.source === 'predicted').length
+    : predictedCases.length;
+  const ethicsCount = useDb ? dbCases.ethics.length : ethicsCases.length;
+
   // 현재 사용할 데이터 소스 결정
   const getDataSource = () => {
-    if (useDatabase && (dbCases.major.length > 0 || dbCases.ethics.length > 0)) {
+    if (useDb) {
       const baseCases = caseType === 'major' ? dbCases.major : dbCases.ethics;
       if (caseType === 'major' && includePredicted) {
-        const examCases = baseCases.filter(c => c.source === 'exam');
-        const predicted = baseCases.filter(c => c.source === 'predicted');
-        return { cases: [...examCases, ...predicted], examCount: examCases.length, predictedCount: predicted.length };
+        return [...baseCases];
       }
-      const examCases = baseCases.filter(c => c.source === 'exam');
-      const predicted = baseCases.filter(c => c.source === 'predicted');
-      return { cases: examCases, examCount: examCases.length, predictedCount: predicted.length };
+      if (caseType === 'major') {
+        return baseCases.filter(c => c.source === 'exam');
+      }
+      return baseCases;
     } else {
       const baseCases = caseType === 'major' ? majorCases : ethicsCases;
       if (caseType === 'major' && includePredicted) {
-        return { cases: [...baseCases, ...predictedCases], examCount: baseCases.length, predictedCount: predictedCases.length };
+        return [...baseCases, ...predictedCases];
       }
-      return { cases: baseCases, examCount: baseCases.length, predictedCount: predictedCases.length };
+      return baseCases;
     }
   };
 
-  const { cases: currentCases, examCount, predictedCount } = getDataSource();
+  const currentCases = getDataSource();
   const currentCategories = caseType === 'major' ? majorCategories : ethicsCategories;
 
   const filteredCases = currentCases.filter(c => {
@@ -396,7 +405,7 @@ export default function InterviewSimulator() {
             }`}
           >
             <BookOpen className="w-5 h-5" />
-            전공 ({includePredicted ? examCount + predictedCount : examCount})
+            전공 ({includePredicted ? majorExamCount + majorPredictedCount : majorExamCount})
           </button>
           <button
             onClick={() => setCaseType('ethics')}
@@ -407,7 +416,7 @@ export default function InterviewSimulator() {
             }`}
           >
             <Scale className="w-5 h-5" />
-            윤리 ({useDatabase && dbCases.ethics.length > 0 ? dbCases.ethics.length : ethicsCases.length})
+            윤리 ({ethicsCount})
           </button>
         </div>
 
@@ -422,7 +431,7 @@ export default function InterviewSimulator() {
                 className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-500 focus:ring-purple-500"
               />
               <span className="text-sm text-gray-300">
-                🔮 DSM-5-TR 예상문제 포함 (+{predictedCount}건)
+                🔮 DSM-5-TR 예상문제 포함 (+{majorPredictedCount}건)
               </span>
             </label>
           </div>
