@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { ArrowLeft, Plus, MessageSquare, Send, X, User, Trash2, Pencil, Check, ExternalLink, Image } from 'lucide-react';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -19,74 +20,85 @@ const ALLOWED_MEMBERS = {
   'dawoon85@gmail.com': { name: '정다운', avatar: '🐼' },
 };
 
-// URL을 감지하고 렌더링하는 컴포넌트
+// 마크다운 + URL 렌더링 컴포넌트
 const RenderContent = ({ content }) => {
   if (!content) return null;
 
-  // URL 정규식
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
   // 이미지 확장자
   const imageExtensions = /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i;
   // 구글 드라이브 이미지 링크
   const googleDriveRegex = /drive\.google\.com\/file\/d\/([^/]+)/;
 
-  const parts = content.split(urlRegex);
+  // 커스텀 링크 렌더러
+  const customComponents = {
+    // 링크 처리
+    a: ({ href, children }) => {
+      const isImage = imageExtensions.test(href);
+      const isGoogleDrive = googleDriveRegex.test(href);
+
+      // 구글 드라이브 이미지 변환
+      let imageUrl = href;
+      if (isGoogleDrive) {
+        const match = href.match(googleDriveRegex);
+        if (match) {
+          imageUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+        }
+      }
+
+      if (isImage || isGoogleDrive) {
+        return (
+          <a href={href} target="_blank" rel="noopener noreferrer" className="block my-2">
+            <img
+              src={imageUrl}
+              alt="첨부 이미지"
+              className="max-w-full max-h-96 rounded-lg border hover:opacity-90 transition-opacity"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div className="hidden items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-blue-600 hover:bg-gray-200 w-fit">
+              <ExternalLink className="w-4 h-4" />
+              <span className="text-sm truncate max-w-xs">링크 열기</span>
+            </div>
+          </a>
+        );
+      }
+
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-blue-600 hover:bg-gray-200 transition-colors text-sm"
+        >
+          <ExternalLink className="w-3 h-3" />
+          <span className="truncate max-w-xs">
+            {href.includes('drive.google.com') ? '구글 드라이브' :
+             href.includes('docs.google.com') ? '구글 문서' :
+             children || '링크'}
+          </span>
+        </a>
+      );
+    },
+    // 마크다운 스타일링
+    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+    strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+    em: ({ children }) => <em className="italic">{children}</em>,
+    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+    li: ({ children }) => <li>{children}</li>,
+    code: ({ children }) => <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-pink-600">{children}</code>,
+    pre: ({ children }) => <pre className="bg-gray-100 p-3 rounded-lg overflow-x-auto text-sm my-2">{children}</pre>,
+    blockquote: ({ children }) => <blockquote className="border-l-4 border-gray-300 pl-3 italic text-gray-600 my-2">{children}</blockquote>,
+    h1: ({ children }) => <h1 className="text-xl font-bold mb-2">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-lg font-bold mb-2">{children}</h2>,
+    h3: ({ children }) => <h3 className="text-base font-bold mb-1">{children}</h3>,
+  };
 
   return (
-    <div className="space-y-2">
-      {parts.map((part, index) => {
-        if (part.match(urlRegex)) {
-          const isImage = imageExtensions.test(part);
-          const isGoogleDrive = googleDriveRegex.test(part);
-
-          // 구글 드라이브 이미지 변환
-          let imageUrl = part;
-          if (isGoogleDrive) {
-            const match = part.match(googleDriveRegex);
-            if (match) {
-              imageUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
-            }
-          }
-
-          if (isImage || isGoogleDrive) {
-            return (
-              <a key={index} href={part} target="_blank" rel="noopener noreferrer" className="block">
-                <img
-                  src={imageUrl}
-                  alt="첨부 이미지"
-                  className="max-w-full max-h-96 rounded-lg border hover:opacity-90 transition-opacity"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-                <div className="hidden items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-blue-600 hover:bg-gray-200 w-fit">
-                  <ExternalLink className="w-4 h-4" />
-                  <span className="text-sm truncate max-w-xs">링크 열기</span>
-                </div>
-              </a>
-            );
-          } else {
-            return (
-              <a
-                key={index}
-                href={part}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-blue-600 hover:bg-gray-200 transition-colors"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span className="text-sm truncate max-w-xs">
-                  {part.includes('drive.google.com') ? '구글 드라이브 링크' :
-                   part.includes('docs.google.com') ? '구글 문서 링크' :
-                   '링크 열기'}
-                </span>
-              </a>
-            );
-          }
-        }
-        return part ? <span key={index} className="whitespace-pre-wrap">{part}</span> : null;
-      })}
+    <div className="prose prose-sm max-w-none">
+      <ReactMarkdown components={customComponents}>{content}</ReactMarkdown>
     </div>
   );
 };
