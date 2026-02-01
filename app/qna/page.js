@@ -481,6 +481,12 @@ export default function QnAPage() {
                   rows={10}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                 />
+                <div className="p-3 bg-gray-50 rounded-lg text-xs text-gray-500 space-y-1">
+                  <p className="font-medium text-gray-600">📝 마크다운 문법:</p>
+                  <p><code className="bg-gray-200 px-1 rounded">**굵게**</code> → 굵게 · <code className="bg-gray-200 px-1 rounded">*기울임*</code> → 기울임 · <code className="bg-gray-200 px-1 rounded">- 항목</code> → 목록</p>
+                  <p><code className="bg-gray-200 px-1 rounded">`코드`</code> → 코드 · <code className="bg-gray-200 px-1 rounded">&gt; 인용</code> → 인용문 · <code className="bg-gray-200 px-1 rounded"># 제목</code> → 큰 제목</p>
+                  <p className="font-medium text-gray-600 pt-1">🔗 구글 드라이브 링크로 이미지/파일 공유 가능 (https://... 형식으로 붙여넣기)</p>
+                </div>
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setEditingQuestion(false)}
