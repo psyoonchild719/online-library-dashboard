@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { ArrowLeft, Plus, MessageSquare, Send, X, User, Trash2, Pencil, Check } from 'lucide-react';
+import { ArrowLeft, Plus, MessageSquare, Send, X, User, Trash2, Pencil, Check, ExternalLink, Image } from 'lucide-react';
 import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,6 +17,78 @@ const ALLOWED_MEMBERS = {
   'youjin13ae@gmail.com': { name: '배유진', avatar: '🐱' },
   'hipsychology@gmail.com': { name: '황해인', avatar: '🐶' },
   'dawoon85@gmail.com': { name: '정다운', avatar: '🐼' },
+};
+
+// URL을 감지하고 렌더링하는 컴포넌트
+const RenderContent = ({ content }) => {
+  if (!content) return null;
+
+  // URL 정규식
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  // 이미지 확장자
+  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i;
+  // 구글 드라이브 이미지 링크
+  const googleDriveRegex = /drive\.google\.com\/file\/d\/([^/]+)/;
+
+  const parts = content.split(urlRegex);
+
+  return (
+    <div className="space-y-2">
+      {parts.map((part, index) => {
+        if (part.match(urlRegex)) {
+          const isImage = imageExtensions.test(part);
+          const isGoogleDrive = googleDriveRegex.test(part);
+
+          // 구글 드라이브 이미지 변환
+          let imageUrl = part;
+          if (isGoogleDrive) {
+            const match = part.match(googleDriveRegex);
+            if (match) {
+              imageUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+            }
+          }
+
+          if (isImage || isGoogleDrive) {
+            return (
+              <a key={index} href={part} target="_blank" rel="noopener noreferrer" className="block">
+                <img
+                  src={imageUrl}
+                  alt="첨부 이미지"
+                  className="max-w-full max-h-96 rounded-lg border hover:opacity-90 transition-opacity"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="hidden items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-blue-600 hover:bg-gray-200 w-fit">
+                  <ExternalLink className="w-4 h-4" />
+                  <span className="text-sm truncate max-w-xs">링크 열기</span>
+                </div>
+              </a>
+            );
+          } else {
+            return (
+              <a
+                key={index}
+                href={part}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-blue-600 hover:bg-gray-200 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span className="text-sm truncate max-w-xs">
+                  {part.includes('drive.google.com') ? '구글 드라이브 링크' :
+                   part.includes('docs.google.com') ? '구글 문서 링크' :
+                   '링크 열기'}
+                </span>
+              </a>
+            );
+          }
+        }
+        return part ? <span key={index} className="whitespace-pre-wrap">{part}</span> : null;
+      })}
+    </div>
+  );
 };
 
 export default function QnAPage() {
@@ -408,7 +480,9 @@ export default function QnAPage() {
             ) : (
               <>
                 <h2 className="text-lg font-bold text-gray-900 mb-3">{selectedQuestion.title}</h2>
-                <p className="text-gray-700 whitespace-pre-wrap">{selectedQuestion.content}</p>
+                <div className="text-gray-700">
+                  <RenderContent content={selectedQuestion.content} />
+                </div>
               </>
             )}
           </div>
@@ -477,7 +551,9 @@ export default function QnAPage() {
                           </button>
                         </div>
                       ) : (
-                        <p className="text-gray-700 text-sm mt-1 whitespace-pre-wrap">{c.content}</p>
+                        <div className="text-gray-700 text-sm mt-1">
+                          <RenderContent content={c.content} />
+                        </div>
                       )}
                     </div>
                   </div>
