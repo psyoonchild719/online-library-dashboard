@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { ArrowLeft, Plus, MessageSquare, Send, X, User } from 'lucide-react';
+import { ArrowLeft, Plus, MessageSquare, Send, X, User, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -139,6 +139,40 @@ export default function QnAPage() {
     }
   };
 
+  // 질문 삭제
+  const handleDeleteQuestion = async (questionId) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    const { error } = await supabase
+      .from('questions')
+      .delete()
+      .eq('id', questionId);
+
+    if (!error) {
+      setSelectedQuestion(null);
+      setComments([]);
+      loadQuestions();
+    } else {
+      alert('삭제에 실패했습니다.');
+    }
+  };
+
+  // 댓글 삭제
+  const handleDeleteComment = async (commentId) => {
+    if (!confirm('댓글을 삭제하시겠습니까?')) return;
+
+    const { error } = await supabase
+      .from('comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (!error) {
+      loadComments(selectedQuestion.id);
+    } else {
+      alert('삭제에 실패했습니다.');
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
@@ -248,18 +282,29 @@ export default function QnAPage() {
 
           {/* 질문 내용 */}
           <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="flex-shrink-0">
-                {selectedQuestion.members?.avatar?.startsWith('http') ? (
-                  <img src={selectedQuestion.members.avatar} alt="" className="w-10 h-10 rounded-full" />
-                ) : (
-                  <span className="text-2xl">{selectedQuestion.members?.avatar || '👤'}</span>
-                )}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  {selectedQuestion.members?.avatar?.startsWith('http') ? (
+                    <img src={selectedQuestion.members.avatar} alt="" className="w-10 h-10 rounded-full" />
+                  ) : (
+                    <span className="text-2xl">{selectedQuestion.members?.avatar || '👤'}</span>
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">{selectedQuestion.members?.name}</p>
+                  <p className="text-xs text-gray-400">{formatDate(selectedQuestion.created_at)}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-gray-900">{selectedQuestion.members?.name}</p>
-                <p className="text-xs text-gray-400">{formatDate(selectedQuestion.created_at)}</p>
-              </div>
+              {currentMember?.id === selectedQuestion.member_id && (
+                <button
+                  onClick={() => handleDeleteQuestion(selectedQuestion.id)}
+                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  title="삭제"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
             <h2 className="text-lg font-bold text-gray-900 mb-3">{selectedQuestion.title}</h2>
             <p className="text-gray-700 whitespace-pre-wrap">{selectedQuestion.content}</p>
@@ -283,9 +328,20 @@ export default function QnAPage() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm text-gray-900">{c.members?.name}</span>
-                        <span className="text-xs text-gray-400">{formatDate(c.created_at)}</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm text-gray-900">{c.members?.name}</span>
+                          <span className="text-xs text-gray-400">{formatDate(c.created_at)}</span>
+                        </div>
+                        {currentMember?.id === c.member_id && (
+                          <button
+                            onClick={() => handleDeleteComment(c.id)}
+                            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                            title="삭제"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
                       </div>
                       <p className="text-gray-700 text-sm mt-1 whitespace-pre-wrap">{c.content}</p>
                     </div>
