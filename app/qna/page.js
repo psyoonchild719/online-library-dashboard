@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { ArrowLeft, Plus, MessageSquare, Send, X, User, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, MessageSquare, Send, X, User, Trash2, Pencil, Check } from 'lucide-react';
 import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -30,6 +30,11 @@ export default function QnAPage() {
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
   const [newComment, setNewComment] = useState('');
+  const [editingQuestion, setEditingQuestion] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentContent, setEditCommentContent] = useState('');
 
   // 인증 상태 확인
   useEffect(() => {
@@ -173,6 +178,62 @@ export default function QnAPage() {
     }
   };
 
+  // 질문 수정 시작
+  const startEditQuestion = () => {
+    setEditTitle(selectedQuestion.title);
+    setEditContent(selectedQuestion.content);
+    setEditingQuestion(true);
+  };
+
+  // 질문 수정 저장
+  const handleUpdateQuestion = async () => {
+    if (!editTitle.trim() || !editContent.trim()) return;
+
+    const { error } = await supabase
+      .from('questions')
+      .update({
+        title: editTitle.trim(),
+        content: editContent.trim()
+      })
+      .eq('id', selectedQuestion.id);
+
+    if (!error) {
+      setSelectedQuestion({
+        ...selectedQuestion,
+        title: editTitle.trim(),
+        content: editContent.trim()
+      });
+      setEditingQuestion(false);
+      loadQuestions();
+    } else {
+      alert('수정에 실패했습니다.');
+    }
+  };
+
+  // 댓글 수정 시작
+  const startEditComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditCommentContent(comment.content);
+  };
+
+  // 댓글 수정 저장
+  const handleUpdateComment = async (commentId) => {
+    if (!editCommentContent.trim()) return;
+
+    const { error } = await supabase
+      .from('comments')
+      .update({ content: editCommentContent.trim() })
+      .eq('id', commentId);
+
+    if (!error) {
+      setEditingCommentId(null);
+      setEditCommentContent('');
+      loadComments(selectedQuestion.id);
+    } else {
+      alert('수정에 실패했습니다.');
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
@@ -296,18 +357,60 @@ export default function QnAPage() {
                   <p className="text-xs text-gray-400">{formatDate(selectedQuestion.created_at)}</p>
                 </div>
               </div>
-              {currentMember?.id === selectedQuestion.member_id && (
-                <button
-                  onClick={() => handleDeleteQuestion(selectedQuestion.id)}
-                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  title="삭제"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+              {currentMember?.id === selectedQuestion.member_id && !editingQuestion && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={startEditQuestion}
+                    className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="수정"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteQuestion(selectedQuestion.id)}
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="삭제"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </div>
-            <h2 className="text-lg font-bold text-gray-900 mb-3">{selectedQuestion.title}</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">{selectedQuestion.content}</p>
+            {editingQuestion ? (
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                />
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setEditingQuestion(false)}
+                    className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-lg text-sm"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleUpdateQuestion}
+                    className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                  >
+                    저장
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-lg font-bold text-gray-900 mb-3">{selectedQuestion.title}</h2>
+                <p className="text-gray-700 whitespace-pre-wrap">{selectedQuestion.content}</p>
+              </>
+            )}
           </div>
 
           {/* 댓글 목록 */}
@@ -333,17 +436,49 @@ export default function QnAPage() {
                           <span className="font-medium text-sm text-gray-900">{c.members?.name}</span>
                           <span className="text-xs text-gray-400">{formatDate(c.created_at)}</span>
                         </div>
-                        {currentMember?.id === c.member_id && (
-                          <button
-                            onClick={() => handleDeleteComment(c.id)}
-                            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                            title="삭제"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
+                        {currentMember?.id === c.member_id && editingCommentId !== c.id && (
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => startEditComment(c)}
+                              className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                              title="수정"
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteComment(c.id)}
+                              className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                              title="삭제"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
                         )}
                       </div>
-                      <p className="text-gray-700 text-sm mt-1 whitespace-pre-wrap">{c.content}</p>
+                      {editingCommentId === c.id ? (
+                        <div className="mt-2 flex gap-2">
+                          <input
+                            type="text"
+                            value={editCommentContent}
+                            onChange={(e) => setEditCommentContent(e.target.value)}
+                            className="flex-1 px-2 py-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <button
+                            onClick={() => setEditingCommentId(null)}
+                            className="px-2 py-1 text-gray-500 hover:bg-gray-200 rounded text-sm"
+                          >
+                            취소
+                          </button>
+                          <button
+                            onClick={() => handleUpdateComment(c.id)}
+                            className="px-2 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                          >
+                            저장
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-gray-700 text-sm mt-1 whitespace-pre-wrap">{c.content}</p>
+                      )}
                     </div>
                   </div>
                 ))
