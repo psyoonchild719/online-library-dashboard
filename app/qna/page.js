@@ -183,7 +183,7 @@ export default function QnAPage() {
           <Link href="/" className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">💬 Q&A 토론방</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">💬 토론의 방</h1>
         </div>
         <button
           onClick={() => setShowNewQuestion(true)}

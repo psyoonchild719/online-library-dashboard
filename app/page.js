@@ -704,7 +704,7 @@ export default function OnlineLibraryDashboard() {
             className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
           >
             <MessageSquare className="w-4 h-4" />
-            Q&A 토론
+            토론의 방
           </Link>
 
           <Link
