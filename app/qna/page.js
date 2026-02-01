@@ -478,8 +478,8 @@ export default function QnAPage() {
                 <textarea
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  rows={10}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                 />
                 <div className="flex justify-end gap-2">
                   <button
@@ -631,9 +631,9 @@ export default function QnAPage() {
                 <textarea
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
-                  placeholder="질문 내용을 자세히 작성해주세요"
-                  rows={5}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  placeholder="질문 내용을 자세히 작성해주세요 (마크다운 지원: **굵게**, *기울임*, - 목록)"
+                  rows={10}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                   maxLength={2000}
                 />
               </div>
