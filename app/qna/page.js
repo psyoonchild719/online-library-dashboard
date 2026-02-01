@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { ArrowLeft, Plus, MessageSquare, Send, X, User, Trash2, Pencil, Check, ExternalLink, Image } from 'lucide-react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -98,7 +99,7 @@ const RenderContent = ({ content }) => {
 
   return (
     <div className="prose prose-sm max-w-none">
-      <ReactMarkdown components={customComponents}>{content}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkBreaks]} components={customComponents}>{content}</ReactMarkdown>
     </div>
   );
 };
