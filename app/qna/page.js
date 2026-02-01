@@ -162,7 +162,8 @@ export default function QnAPage() {
       .from('questions')
       .select(`
         *,
-        members (name, avatar)
+        members (name, avatar),
+        comments (count)
       `)
       .order('created_at', { ascending: false });
 
@@ -405,6 +406,11 @@ export default function QnAPage() {
                       <span>{q.members?.name}</span>
                       <span>•</span>
                       <span>{formatDate(q.created_at)}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="w-3 h-3" />
+                        {q.comments?.[0]?.count || 0}
+                      </span>
                     </div>
                   </div>
                 </div>
