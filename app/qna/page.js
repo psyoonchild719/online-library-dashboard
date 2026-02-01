@@ -631,7 +631,18 @@ export default function QnAPage() {
                 <textarea
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
-                  placeholder="질문 내용을 자세히 작성해주세요 (마크다운 지원: **굵게**, *기울임*, - 목록)"
+                  placeholder={`질문 내용을 자세히 작성해주세요
+
+📝 마크다운 문법:
+**굵게** → 굵게
+*기울임* → 기울임
+- 항목 → • 목록
+1. 번호 → 번호 목록
+\`코드\` → 코드
+> 인용 → 인용문
+# 제목 → 큰 제목
+
+🔗 구글 드라이브 링크로 이미지/파일 공유 가능`}
                   rows={10}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                   maxLength={2000}
