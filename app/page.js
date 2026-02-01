@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Users, Clock, Calendar, TrendingUp, LogIn, LogOut, ExternalLink, X, Target, Loader2, Brain } from 'lucide-react';
+import { Users, Clock, Calendar, TrendingUp, LogIn, LogOut, ExternalLink, X, Target, Loader2, MessageSquare, Brain } from 'lucide-react';
+import Link from 'next/link';
 
 // Supabase 클라이언트 설정 (환경변수 사용)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -698,13 +699,21 @@ export default function OnlineLibraryDashboard() {
             도서관 입실하기
           </button>
 
-          <a
-            href="/interview"
+          <Link
+            href="/qna"
             className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+          >
+            <MessageSquare className="w-4 h-4" />
+            Q&A 토론
+          </Link>
+
+          <Link
+            href="/interview"
+            className="flex items-center justify-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors text-sm"
           >
             <Brain className="w-4 h-4" />
             면접 연습
-          </a>
+          </Link>
 
           {!isCurrentUserOnline ? (
             <button
