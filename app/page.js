@@ -37,6 +37,7 @@ export default function OnlineLibraryDashboard() {
   const [authLoading, setAuthLoading] = useState(true);
   const [todayStudyTime, setTodayStudyTime] = useState({}); // 오늘의 멤버별 학습시간
   const [totalStudyTimeMap, setTotalStudyTimeMap] = useState({}); // 멤버별 누적 학습시간 (분)
+  const [newPostsCount, setNewPostsCount] = useState(0); // 토론의 방 새 글 개수
 
   // 인증 상태 확인
   useEffect(() => {
@@ -245,6 +246,9 @@ export default function OnlineLibraryDashboard() {
       // 누적 학습시간 계산
       await loadTotalStudyTime();
 
+      // 토론의 방 새 글 개수
+      await loadNewPostsCount();
+
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -336,6 +340,25 @@ export default function OnlineLibraryDashboard() {
       setTotalStudyTimeMap(studyTimeMap);
     } catch (error) {
       console.error('Error loading total study time:', error);
+    }
+  };
+
+  // 토론의 방 새 글 개수 로드 (24시간 이내)
+  const loadNewPostsCount = async () => {
+    try {
+      const yesterday = new Date();
+      yesterday.setHours(yesterday.getHours() - 24);
+
+      const { count, error } = await supabase
+        .from('questions')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', yesterday.toISOString());
+
+      if (!error) {
+        setNewPostsCount(count || 0);
+      }
+    } catch (error) {
+      console.error('Error loading new posts count:', error);
     }
   };
 
@@ -701,10 +724,15 @@ export default function OnlineLibraryDashboard() {
 
           <Link
             href="/qna"
-            className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+            className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm relative"
           >
             <MessageSquare className="w-4 h-4" />
             토론의 방
+            {newPostsCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                {newPostsCount}
+              </span>
+            )}
           </Link>
 
           <Link

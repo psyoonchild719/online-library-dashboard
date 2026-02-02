@@ -331,6 +331,14 @@ export default function QnAPage() {
     });
   };
 
+  // 24시간 이내 작성된 글인지 확인
+  const isNewPost = (dateString) => {
+    const postDate = new Date(dateString);
+    const now = new Date();
+    const hoursDiff = (now - postDate) / (1000 * 60 * 60);
+    return hoursDiff <= 24;
+  };
+
   // 로딩 중
   if (loading) {
     return (
@@ -401,7 +409,12 @@ export default function QnAPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">{q.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-gray-900 truncate">{q.title}</h3>
+                      {isNewPost(q.created_at) && (
+                        <span className="px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded">NEW</span>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-500 mt-1 line-clamp-2">{q.content}</p>
                     <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                       <span>{q.members?.name}</span>
