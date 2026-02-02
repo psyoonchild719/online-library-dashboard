@@ -556,25 +556,32 @@ export default function QnAPage() {
                         )}
                       </div>
                       {editingCommentId === c.id ? (
-                        <div className="mt-2 flex gap-2">
-                          <input
-                            type="text"
+                        <div className="mt-2 space-y-2">
+                          <textarea
                             value={editCommentContent}
                             onChange={(e) => setEditCommentContent(e.target.value)}
-                            className="flex-1 px-2 py-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            rows={3}
+                            className="w-full px-2 py-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                           />
-                          <button
-                            onClick={() => setEditingCommentId(null)}
-                            className="px-2 py-1 text-gray-500 hover:bg-gray-200 rounded text-sm"
-                          >
-                            취소
-                          </button>
-                          <button
-                            onClick={() => handleUpdateComment(c.id)}
-                            className="px-2 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                          >
-                            저장
-                          </button>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-gray-400">
+                              📝 <code className="bg-gray-100 px-1 rounded">**굵게**</code> · <code className="bg-gray-100 px-1 rounded">*기울임*</code> · 🔗 URL 자동 링크
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setEditingCommentId(null)}
+                                className="px-2 py-1 text-gray-500 hover:bg-gray-200 rounded text-sm"
+                              >
+                                취소
+                              </button>
+                              <button
+                                onClick={() => handleUpdateComment(c.id)}
+                                className="px-2 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                              >
+                                저장
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <div className="text-gray-700 text-sm mt-1">
@@ -588,21 +595,27 @@ export default function QnAPage() {
             </div>
 
             {/* 댓글 입력 */}
-            <form onSubmit={handleSubmitComment} className="flex gap-2">
-              <input
-                type="text"
+            <form onSubmit={handleSubmitComment} className="space-y-2">
+              <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="댓글을 입력하세요..."
-                className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                rows={3}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-y"
               />
-              <button
-                type="submit"
-                disabled={!newComment.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-              >
-                <Send className="w-4 h-4" />
-              </button>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-xs text-gray-400">
+                  📝 <code className="bg-gray-100 px-1 rounded">**굵게**</code> · <code className="bg-gray-100 px-1 rounded">*기울임*</code> · <code className="bg-gray-100 px-1 rounded">`코드`</code> · 🔗 URL 자동 링크
+                </p>
+                <button
+                  type="submit"
+                  disabled={!newComment.trim()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm"
+                >
+                  <Send className="w-4 h-4" />
+                  등록
+                </button>
+              </div>
             </form>
           </div>
         </div>
