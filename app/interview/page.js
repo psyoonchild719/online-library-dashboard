@@ -46,6 +46,7 @@ export default function InterviewSimulator() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [sourceFilter, setSourceFilter] = useState('exam'); // 'exam' | 'predicted' | 'all'
   const [practiceCount, setPracticeCount] = useState(0);
+  const [practicedCasesToday, setPracticedCasesToday] = useState(new Set()); // 오늘 연습한 사례 ID
   const [userAnswers, setUserAnswers] = useState({}); // 질문별 답안 저장: { 'caseId-questionIndex': 'answer' }
   const [checkedPointsMap, setCheckedPointsMap] = useState({}); // 질문별 체크포인트: { 'caseId-questionIndex': [0, 1, 2] }
   const [saveStatus, setSaveStatus] = useState('saved'); // 'saved' | 'saving' | 'error'
@@ -81,7 +82,7 @@ export default function InterviewSimulator() {
     }
   }, [currentMember]);
 
-  // DB에 답안 저장 (upsert)
+  // DB에 답안 저장 (upsert) + 연습 기록
   const saveAnswerToDB = useCallback(async (caseId, questionIndex, answer, checkedPoints) => {
     if (!currentMember || !caseId) return;
 
@@ -102,11 +103,16 @@ export default function InterviewSimulator() {
 
       if (error) throw error;
       setSaveStatus('saved');
+
+      // 답안 저장 시 해당 사례 연습 기록 (오늘 처음인 경우만)
+      if (answer && answer.trim().length > 0) {
+        logPractice(caseId);
+      }
     } catch (error) {
       console.error('답안 저장 실패:', error);
       setSaveStatus('error');
     }
-  }, [currentMember]);
+  }, [currentMember, practicedCasesToday]);
 
   // DB에서 사례 로드
   const loadCasesFromDB = useCallback(async () => {
@@ -248,26 +254,36 @@ export default function InterviewSimulator() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const { count } = await supabase
+    const { data, count } = await supabase
       .from('interview_logs')
-      .select('*', { count: 'exact', head: true })
+      .select('case_id', { count: 'exact' })
       .eq('member_id', currentMember.id)
       .gte('created_at', today.toISOString());
 
     setPracticeCount(count || 0);
+
+    // 오늘 연습한 사례 ID 저장
+    if (data) {
+      const caseIds = new Set(data.map(log => log.case_id));
+      setPracticedCasesToday(caseIds);
+    }
   };
 
-  // 연습 기록 저장
-  const logPractice = async () => {
-    if (!currentMember || !currentCase) return;
+  // 연습 기록 저장 (사례당 하루 1건만)
+  const logPractice = async (caseId) => {
+    if (!currentMember || !caseId) return;
+
+    // 이미 오늘 연습한 사례면 스킵
+    if (practicedCasesToday.has(caseId)) return;
 
     try {
       await supabase.from('interview_logs').insert({
         member_id: currentMember.id,
-        case_id: currentCase.id,
-        time_spent: timer
+        case_id: caseId,
+        time_spent: 0
       });
       setPracticeCount(prev => prev + 1);
+      setPracticedCasesToday(prev => new Set([...prev, caseId]));
     } catch (error) {
       console.error('연습 기록 저장 실패:', error);
     }
@@ -348,8 +364,6 @@ export default function InterviewSimulator() {
   };
 
   const nextCase = () => {
-    if (timer > 30) logPractice();
-
     if (currentCaseIndex < filteredCases.length - 1) {
       setCurrentCaseIndex(prev => prev + 1);
       setCurrentQuestionIndex(0);
@@ -400,8 +414,6 @@ export default function InterviewSimulator() {
   };
 
   const randomCase = () => {
-    if (timer > 30) logPractice();
-
     const randomIndex = Math.floor(Math.random() * filteredCases.length);
     setCurrentCaseIndex(randomIndex);
     setCurrentQuestionIndex(0);
