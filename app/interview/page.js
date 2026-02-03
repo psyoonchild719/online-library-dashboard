@@ -690,7 +690,7 @@ export default function InterviewSimulator() {
               {/* 사례 헤더 - 답안 확인 후 정보 공개 */}
               <div className="p-3 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {/* 고유번호 항상 표시 */}
+                  {/* 고유번호만 표시 */}
                   {currentCase.caseId && (
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
                       currentCase.source === 'exam'
@@ -699,27 +699,6 @@ export default function InterviewSimulator() {
                     }`}>
                       {currentCase.caseId}
                     </span>
-                  )}
-                  {showAnswer && (
-                    <>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                        caseType === 'major'
-                          ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                          : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                      }`}>
-                        {currentCase.category}
-                      </span>
-                      {currentCase.source === 'predicted' && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-50 text-violet-600 border border-violet-200 font-medium">
-                          🔮 예상
-                        </span>
-                      )}
-                      {currentCase.years?.filter(y => y !== '예상').map(year => (
-                        <span key={year} className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded-full">
-                          {year}
-                        </span>
-                      ))}
-                    </>
                   )}
                 </div>
                 <button
@@ -730,23 +709,6 @@ export default function InterviewSimulator() {
                   {showCase ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
-
-              {/* 답안 확인 후 제목/진단 공개 */}
-              {showAnswer && (
-                <div className="px-3 pt-3 pb-2 bg-amber-50 border-b border-amber-100">
-                  <h2 className="text-sm font-bold text-gray-800 mb-0.5">{currentCase.title}</h2>
-                  {currentCase.diagnosis && (
-                    <p className="text-xs text-amber-700">
-                      <span className="font-medium">진단:</span> {currentCase.diagnosis}
-                    </p>
-                  )}
-                  {currentCase.topic && (
-                    <p className="text-xs text-amber-700">
-                      <span className="font-medium">주제:</span> {currentCase.topic}
-                    </p>
-                  )}
-                </div>
-              )}
 
               {/* 사례 내용 - 항상 표시 가능 */}
               {showCase && (
