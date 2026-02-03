@@ -690,7 +690,7 @@ export default function InterviewSimulator() {
               {/* 사례 헤더 - 답안 확인 후 정보 공개 */}
               <div className="p-3 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {/* 고유번호만 표시 */}
+                  {/* 고유번호 */}
                   {currentCase.caseId && (
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
                       currentCase.source === 'exam'
@@ -700,6 +700,12 @@ export default function InterviewSimulator() {
                       {currentCase.caseId}
                     </span>
                   )}
+                  {/* 출제연도 */}
+                  {currentCase.years?.filter(y => y !== '예상').map(year => (
+                    <span key={year} className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded-full">
+                      {year}
+                    </span>
+                  ))}
                 </div>
                 <button
                   onClick={() => setShowCase(!showCase)}
