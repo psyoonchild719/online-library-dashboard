@@ -84,18 +84,18 @@ const RenderContent = ({ content }) => {
       );
     },
     // 마크다운 스타일링
-    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+    p: ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
     strong: ({ children }) => <strong className="font-bold">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
-    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
-    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+    ul: ({ children }) => <ul className="list-disc list-inside mb-1.5 space-y-0.5">{children}</ul>,
+    ol: ({ children }) => <ol className="list-decimal list-inside mb-1.5 space-y-0.5">{children}</ol>,
     li: ({ children }) => <li>{children}</li>,
-    code: ({ children }) => <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-pink-600">{children}</code>,
-    pre: ({ children }) => <pre className="bg-gray-100 p-3 rounded-lg overflow-x-auto text-sm my-2">{children}</pre>,
-    blockquote: ({ children }) => <blockquote className="border-l-4 border-gray-300 pl-3 italic text-gray-600 my-2">{children}</blockquote>,
-    h1: ({ children }) => <h1 className="text-xl font-bold mb-2">{children}</h1>,
-    h2: ({ children }) => <h2 className="text-lg font-bold mb-2">{children}</h2>,
-    h3: ({ children }) => <h3 className="text-base font-bold mb-1">{children}</h3>,
+    code: ({ children }) => <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono text-pink-600">{children}</code>,
+    pre: ({ children }) => <pre className="bg-gray-100 p-2 rounded-lg overflow-x-auto text-xs my-1.5">{children}</pre>,
+    blockquote: ({ children }) => <blockquote className="border-l-3 border-gray-300 pl-2 italic text-gray-600 my-1.5">{children}</blockquote>,
+    h1: ({ children }) => <h1 className="text-base font-bold mb-1.5">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-sm font-bold mb-1.5">{children}</h2>,
+    h3: ({ children }) => <h3 className="text-sm font-semibold mb-1">{children}</h3>,
   };
 
   return (
@@ -366,56 +366,56 @@ export default function QnAPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 p-3 md:p-4">
       {/* 헤더 */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5" />
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Link href="/" className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors">
+            <ArrowLeft className="w-4 h-4" />
           </Link>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">💬 토론의 방</h1>
+          <h1 className="text-base md:text-lg font-bold text-gray-900">💬 토론의 방</h1>
         </div>
         <button
           onClick={() => setShowNewQuestion(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+          className="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           질문하기
         </button>
       </div>
 
       {/* 질문 목록 */}
       {!selectedQuestion && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {questions.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
-              <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">아직 질문이 없습니다</p>
-              <p className="text-gray-400 text-sm mt-1">첫 번째 질문을 남겨보세요!</p>
+            <div className="bg-white rounded-xl shadow-sm border p-6 text-center">
+              <MessageSquare className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+              <p className="text-gray-500 text-sm">아직 질문이 없습니다</p>
+              <p className="text-gray-400 text-xs mt-1">첫 번째 질문을 남겨보세요!</p>
             </div>
           ) : (
             questions.map(q => (
               <div
                 key={q.id}
                 onClick={() => handleQuestionClick(q)}
-                className="bg-white rounded-xl shadow-sm border p-4 cursor-pointer hover:border-blue-300 transition-colors"
+                className="bg-white rounded-xl shadow-sm border p-3 cursor-pointer hover:border-blue-300 transition-colors"
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2">
                   <div className="flex-shrink-0">
                     {q.members?.avatar?.startsWith('http') ? (
-                      <img src={q.members.avatar} alt="" className="w-10 h-10 rounded-full" />
+                      <img src={q.members.avatar} alt="" className="w-7 h-7 rounded-full" />
                     ) : (
-                      <span className="text-2xl">{q.members?.avatar || '👤'}</span>
+                      <span className="text-lg">{q.members?.avatar || '👤'}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900 truncate">{q.title}</h3>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-semibold text-gray-900 text-sm truncate">{q.title}</h3>
                       {isNewPost(q.created_at) && (
-                        <span className="px-2 py-0.5 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[10px] font-medium rounded-full shadow-sm animate-pulse">NEW</span>
+                        <span className="px-1.5 py-0.5 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[9px] font-medium rounded-full shadow-sm animate-pulse">NEW</span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{q.content}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{q.content}</p>
                     <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                       <span>{q.members?.name}</span>
                       <span>•</span>
@@ -447,70 +447,70 @@ export default function QnAPage() {
           </button>
 
           {/* 질문 내용 */}
-          <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-start gap-3">
+          <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start gap-2">
                 <div className="flex-shrink-0">
                   {selectedQuestion.members?.avatar?.startsWith('http') ? (
-                    <img src={selectedQuestion.members.avatar} alt="" className="w-10 h-10 rounded-full" />
+                    <img src={selectedQuestion.members.avatar} alt="" className="w-7 h-7 rounded-full" />
                   ) : (
-                    <span className="text-2xl">{selectedQuestion.members?.avatar || '👤'}</span>
+                    <span className="text-lg">{selectedQuestion.members?.avatar || '👤'}</span>
                   )}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{selectedQuestion.members?.name}</p>
-                  <p className="text-xs text-gray-400">{formatDate(selectedQuestion.created_at)}</p>
+                  <p className="font-medium text-gray-900 text-sm">{selectedQuestion.members?.name}</p>
+                  <p className="text-[11px] text-gray-400">{formatDate(selectedQuestion.created_at)}</p>
                 </div>
               </div>
               {currentMember?.id === selectedQuestion.member_id && !editingQuestion && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5">
                   <button
                     onClick={startEditQuestion}
-                    className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                     title="수정"
                   >
-                    <Pencil className="w-4 h-4" />
+                    <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDeleteQuestion(selectedQuestion.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                     title="삭제"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
             </div>
             {editingQuestion ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <input
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                  className="w-full px-2.5 py-1.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-sm"
                 />
                 <textarea
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
-                  rows={10}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                  rows={8}
+                  className="w-full px-2.5 py-1.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y text-sm"
                 />
-                <div className="p-3 bg-gray-50 rounded-lg text-xs text-gray-500 space-y-1">
+                <div className="p-2 bg-gray-50 rounded-lg text-[11px] text-gray-500 space-y-0.5">
                   <p className="font-medium text-gray-600">📝 마크다운 문법:</p>
                   <p><code className="bg-gray-200 px-1 rounded">**굵게**</code> → 굵게 · <code className="bg-gray-200 px-1 rounded">*기울임*</code> → 기울임 · <code className="bg-gray-200 px-1 rounded">- 항목</code> → 목록</p>
                   <p><code className="bg-gray-200 px-1 rounded">`코드`</code> → 코드 · <code className="bg-gray-200 px-1 rounded">&gt; 인용</code> → 인용문 · <code className="bg-gray-200 px-1 rounded"># 제목</code> → 큰 제목</p>
-                  <p className="font-medium text-gray-600 pt-1">🔗 구글 드라이브 링크로 이미지/파일 공유 가능 (https://... 형식으로 붙여넣기)</p>
+                  <p className="font-medium text-gray-600 pt-0.5">🔗 구글 드라이브 링크로 이미지/파일 공유 가능 (https://... 형식으로 붙여넣기)</p>
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setEditingQuestion(false)}
-                    className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-lg text-sm"
+                    className="px-2.5 py-1 text-gray-600 hover:bg-gray-100 rounded-lg text-xs"
                   >
                     취소
                   </button>
                   <button
                     onClick={handleUpdateQuestion}
-                    className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                    className="px-2.5 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs"
                   >
                     저장
                   </button>
@@ -518,8 +518,8 @@ export default function QnAPage() {
               </div>
             ) : (
               <>
-                <h2 className="text-lg font-bold text-gray-900 mb-3">{selectedQuestion.title}</h2>
-                <div className="text-gray-700">
+                <h2 className="text-base font-bold text-gray-900 mb-2">{selectedQuestion.title}</h2>
+                <div className="text-gray-700 text-sm">
                   <RenderContent content={selectedQuestion.content} />
                 </div>
               </>
@@ -527,30 +527,30 @@ export default function QnAPage() {
           </div>
 
           {/* 댓글 목록 */}
-          <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">💭 댓글 {comments.length}개</h3>
+          <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
+            <h3 className="font-semibold text-gray-900 mb-3 text-sm">💭 댓글 {comments.length}개</h3>
 
-            <div className="space-y-4 mb-4">
+            <div className="space-y-2 mb-3">
               {comments.length === 0 ? (
-                <p className="text-gray-400 text-center py-4">아직 댓글이 없습니다</p>
+                <p className="text-gray-400 text-center py-3 text-sm">아직 댓글이 없습니다</p>
               ) : (
                 comments.map(c => (
-                  <div key={c.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div key={c.id} className="flex items-start gap-2 p-2 bg-gray-50 rounded-lg">
                     <div className="flex-shrink-0">
                       {c.members?.avatar?.startsWith('http') ? (
-                        <img src={c.members.avatar} alt="" className="w-8 h-8 rounded-full" />
+                        <img src={c.members.avatar} alt="" className="w-6 h-6 rounded-full" />
                       ) : (
-                        <span className="text-xl">{c.members?.avatar || '👤'}</span>
+                        <span className="text-base">{c.members?.avatar || '👤'}</span>
                       )}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm text-gray-900">{c.members?.name}</span>
-                          <span className="text-xs text-gray-400">{formatDate(c.created_at)}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium text-xs text-gray-900">{c.members?.name}</span>
+                          <span className="text-[11px] text-gray-400">{formatDate(c.created_at)}</span>
                         </div>
                         {currentMember?.id === c.member_id && editingCommentId !== c.id && (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
                             <button
                               onClick={() => startEditComment(c)}
                               className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
@@ -569,27 +569,27 @@ export default function QnAPage() {
                         )}
                       </div>
                       {editingCommentId === c.id ? (
-                        <div className="mt-2 space-y-2">
+                        <div className="mt-1.5 space-y-1.5">
                           <textarea
                             value={editCommentContent}
                             onChange={(e) => setEditCommentContent(e.target.value)}
-                            rows={3}
-                            className="w-full px-2 py-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                            rows={2}
+                            className="w-full px-2 py-1 border rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                           />
                           <div className="flex items-center justify-between">
-                            <p className="text-xs text-gray-400">
-                              📝 <code className="bg-gray-100 px-1 rounded">**굵게**</code> · <code className="bg-gray-100 px-1 rounded">*기울임*</code> · 🔗 URL 자동 링크
+                            <p className="text-[10px] text-gray-400">
+                              📝 <code className="bg-gray-100 px-0.5 rounded">**굵게**</code> · <code className="bg-gray-100 px-0.5 rounded">*기울임*</code> · 🔗 URL 자동 링크
                             </p>
-                            <div className="flex gap-2">
+                            <div className="flex gap-1.5">
                               <button
                                 onClick={() => setEditingCommentId(null)}
-                                className="px-2 py-1 text-gray-500 hover:bg-gray-200 rounded text-sm"
+                                className="px-2 py-0.5 text-gray-500 hover:bg-gray-200 rounded text-xs"
                               >
                                 취소
                               </button>
                               <button
                                 onClick={() => handleUpdateComment(c.id)}
-                                className="px-2 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                                className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
                               >
                                 저장
                               </button>
@@ -597,7 +597,7 @@ export default function QnAPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="text-gray-700 text-sm mt-1">
+                        <div className="text-gray-700 text-xs mt-0.5">
                           <RenderContent content={c.content} />
                         </div>
                       )}
@@ -608,24 +608,24 @@ export default function QnAPage() {
             </div>
 
             {/* 댓글 입력 */}
-            <form onSubmit={handleSubmitComment} className="space-y-2">
+            <form onSubmit={handleSubmitComment} className="space-y-1.5">
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="댓글을 입력하세요..."
-                rows={3}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-y"
+                rows={2}
+                className="w-full px-2.5 py-1.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs resize-y"
               />
               <div className="flex items-start justify-between gap-2">
-                <p className="text-xs text-gray-400">
-                  📝 <code className="bg-gray-100 px-1 rounded">**굵게**</code> · <code className="bg-gray-100 px-1 rounded">*기울임*</code> · <code className="bg-gray-100 px-1 rounded">`코드`</code> · 🔗 URL 자동 링크
+                <p className="text-[10px] text-gray-400">
+                  📝 <code className="bg-gray-100 px-0.5 rounded">**굵게**</code> · <code className="bg-gray-100 px-0.5 rounded">*기울임*</code> · <code className="bg-gray-100 px-0.5 rounded">`코드`</code> · 🔗 URL 자동 링크
                 </p>
                 <button
                   type="submit"
                   disabled={!newComment.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm"
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs"
                 >
-                  <Send className="w-4 h-4" />
+                  <Send className="w-3.5 h-3.5" />
                   등록
                 </button>
               </div>
@@ -636,58 +636,58 @@ export default function QnAPage() {
 
       {/* 새 질문 모달 */}
       {showNewQuestion && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-semibold">새 질문 작성</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-3 border-b">
+              <h2 className="text-sm font-semibold">새 질문 작성</h2>
               <button
                 onClick={() => setShowNewQuestion(false)}
                 className="p-1 hover:bg-gray-100 rounded"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
-            <form onSubmit={handleSubmitQuestion} className="p-4 space-y-4">
+            <form onSubmit={handleSubmitQuestion} className="p-3 space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">제목</label>
                 <input
                   type="text"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="질문 제목을 입력하세요"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-2.5 py-1.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   maxLength={100}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">내용</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">내용</label>
                 <textarea
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
                   placeholder="질문 내용을 자세히 작성해주세요"
-                  rows={10}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                  rows={8}
+                  className="w-full px-2.5 py-1.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y text-sm"
                   maxLength={2000}
                 />
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs text-gray-500 space-y-1">
+                <div className="mt-1.5 p-2 bg-gray-50 rounded-lg text-[11px] text-gray-500 space-y-0.5">
                   <p className="font-medium text-gray-600">📝 마크다운 문법:</p>
                   <p><code className="bg-gray-200 px-1 rounded">**굵게**</code> → 굵게 · <code className="bg-gray-200 px-1 rounded">*기울임*</code> → 기울임 · <code className="bg-gray-200 px-1 rounded">- 항목</code> → 목록</p>
                   <p><code className="bg-gray-200 px-1 rounded">`코드`</code> → 코드 · <code className="bg-gray-200 px-1 rounded">&gt; 인용</code> → 인용문 · <code className="bg-gray-200 px-1 rounded"># 제목</code> → 큰 제목</p>
-                  <p className="font-medium text-gray-600 pt-1">🔗 구글 드라이브 링크로 이미지/파일 공유 가능 (https://... 형식으로 붙여넣기)</p>
+                  <p className="font-medium text-gray-600 pt-0.5">🔗 구글 드라이브 링크로 이미지/파일 공유 가능 (https://... 형식으로 붙여넣기)</p>
                 </div>
               </div>
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowNewQuestion(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors text-xs"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
                   disabled={!newTitle.trim() || !newContent.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs"
                 >
                   등록
                 </button>
