@@ -331,12 +331,12 @@ export default function QnAPage() {
     });
   };
 
-  // 24시간 이내 작성된 글인지 확인
+  // 12시간 이내 작성된 글인지 확인
   const isNewPost = (dateString) => {
     const postDate = new Date(dateString);
     const now = new Date();
     const hoursDiff = (now - postDate) / (1000 * 60 * 60);
-    return hoursDiff <= 24;
+    return hoursDiff <= 12;
   };
 
   // 로딩 중
