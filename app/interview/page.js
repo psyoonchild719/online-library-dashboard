@@ -440,7 +440,7 @@ export default function InterviewSimulator() {
           <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Brain className="w-8 h-8 text-indigo-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">면접 시뮬레이터</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">면접 연습</h1>
           <p className="text-gray-500 mb-6">임상심리전문가 자격시험 면접 연습</p>
           <button
             onClick={signInWithGoogle}
@@ -489,7 +489,7 @@ export default function InterviewSimulator() {
               <div className="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center">
                 <Brain className="w-3.5 h-3.5 text-indigo-600" />
               </div>
-              <h1 className="text-sm font-bold text-gray-800">면접 시뮬레이터</h1>
+              <h1 className="text-sm font-bold text-gray-800">면접 연습</h1>
             </div>
             {/* DB 상태 표시 */}
             {dbLoading ? (
@@ -839,10 +839,10 @@ export default function InterviewSimulator() {
 
                 <button
                   onClick={() => setShowAnswer(!showAnswer)}
-                  className={`w-full py-2.5 rounded-lg text-sm font-medium transition ${
+                  className={`w-full py-2 rounded-lg text-xs font-medium transition ${
                     showAnswer
                       ? 'bg-gray-100 text-gray-600 border border-gray-200'
-                      : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200'
+                      : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
                   }`}
                 >
                   {showAnswer ? '핵심 포인트 숨기기' : '✓ 답안 확인하기'}
