@@ -878,7 +878,7 @@ export default function OnlineLibraryDashboard() {
       </div>
 
       {/* 멤버 현황 | 오늘의 학습시간 | 실시간 기록 (한 줄) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* 멤버 현황 */}
         <div className="bg-white rounded-xl shadow-sm border p-3">
           <h2 className="text-sm font-semibold mb-2">👥 멤버 현황</h2>
