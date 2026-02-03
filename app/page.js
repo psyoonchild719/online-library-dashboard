@@ -968,14 +968,14 @@ export default function OnlineLibraryDashboard() {
                     <span className="text-sm">{log.avatar}</span>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs">
-                      <span className="font-medium">{log.member_name}</span>
-                      <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] ${
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-xs">{log.member_name}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] ${
                         log.action === 'enter' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
                         {log.action === 'enter' ? '시작' : '종료'}
                       </span>
-                    </p>
+                    </div>
                     <p className="text-[10px] text-gray-400">{formatTime(log.logged_at)}</p>
                   </div>
                 </div>
