@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import {
   BookOpen, Brain, Scale, ChevronRight, ChevronLeft,
   Eye, EyeOff, Clock, RotateCcw, Home, LogIn, LogOut,
-  CheckCircle, AlertCircle, Shuffle, Database, Settings
+  CheckCircle, AlertCircle, Shuffle, Database, Settings, Save, Cloud, CloudOff
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -48,6 +48,65 @@ export default function InterviewSimulator() {
   const [practiceCount, setPracticeCount] = useState(0);
   const [userAnswers, setUserAnswers] = useState({}); // 질문별 답안 저장: { 'caseId-questionIndex': 'answer' }
   const [checkedPointsMap, setCheckedPointsMap] = useState({}); // 질문별 체크포인트: { 'caseId-questionIndex': [0, 1, 2] }
+  const [saveStatus, setSaveStatus] = useState('saved'); // 'saved' | 'saving' | 'error'
+  const [answersLoaded, setAnswersLoaded] = useState(false);
+  const saveTimeoutRef = useRef(null);
+
+  // DB에서 저장된 답안 로드
+  const loadAnswersFromDB = useCallback(async () => {
+    if (!currentMember) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('interview_answers')
+        .select('*')
+        .eq('member_id', currentMember.id);
+
+      if (error) throw error;
+
+      const answers = {};
+      const checkedPoints = {};
+
+      data?.forEach(item => {
+        const key = `${item.case_id}-${item.question_index}`;
+        answers[key] = item.answer || '';
+        checkedPoints[key] = item.checked_points || [];
+      });
+
+      setUserAnswers(answers);
+      setCheckedPointsMap(checkedPoints);
+      setAnswersLoaded(true);
+    } catch (error) {
+      console.error('답안 로드 실패:', error);
+    }
+  }, [currentMember]);
+
+  // DB에 답안 저장 (upsert)
+  const saveAnswerToDB = useCallback(async (caseId, questionIndex, answer, checkedPoints) => {
+    if (!currentMember || !caseId) return;
+
+    setSaveStatus('saving');
+
+    try {
+      const { error } = await supabase
+        .from('interview_answers')
+        .upsert({
+          member_id: currentMember.id,
+          case_id: caseId,
+          question_index: questionIndex,
+          answer: answer,
+          checked_points: checkedPoints
+        }, {
+          onConflict: 'member_id,case_id,question_index'
+        });
+
+      if (error) throw error;
+      setSaveStatus('saved');
+    } catch (error) {
+      console.error('답안 저장 실패:', error);
+      setSaveStatus('error');
+    }
+  }, [currentMember]);
 
   // DB에서 사례 로드
   const loadCasesFromDB = useCallback(async () => {
@@ -180,8 +239,9 @@ export default function InterviewSimulator() {
   useEffect(() => {
     if (currentMember) {
       loadTodayPracticeCount();
+      loadAnswersFromDB();
     }
-  }, [currentMember]);
+  }, [currentMember, loadAnswersFromDB]);
 
   const loadTodayPracticeCount = async () => {
     if (!currentMember) return;
@@ -260,11 +320,20 @@ export default function InterviewSimulator() {
     return key ? (userAnswers[key] || '') : '';
   };
 
-  // 현재 질문의 답안 저장
+  // 현재 질문의 답안 저장 (자동 저장 포함)
   const setCurrentAnswer = (answer) => {
     const key = getAnswerKey();
-    if (key) {
+    if (key && currentCase) {
       setUserAnswers(prev => ({ ...prev, [key]: answer }));
+
+      // 디바운싱: 1초 후 자동 저장
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      saveTimeoutRef.current = setTimeout(() => {
+        const currentChecked = checkedPointsMap[key] || [];
+        saveAnswerToDB(currentCase.id, currentQuestionIndex, answer, currentChecked);
+      }, 1000);
     }
   };
 
@@ -314,13 +383,18 @@ export default function InterviewSimulator() {
 
   const toggleCheckPoint = (idx) => {
     const key = getAnswerKey();
-    if (!key) return;
+    if (!key || !currentCase) return;
 
     setCheckedPointsMap(prev => {
       const current = prev[key] || [];
       const updated = current.includes(idx)
         ? current.filter(i => i !== idx)
         : [...current, idx];
+
+      // 체크포인트 변경 시 즉시 저장
+      const currentAnswer = userAnswers[key] || '';
+      saveAnswerToDB(currentCase.id, currentQuestionIndex, currentAnswer, updated);
+
       return { ...prev, [key]: updated };
     });
   };
@@ -419,6 +493,19 @@ export default function InterviewSimulator() {
             ) : null}
           </div>
           <div className="flex items-center gap-2">
+            {/* 저장 상태 표시 */}
+            {answersLoaded && (
+              <span className={`text-[10px] px-2 py-1 rounded-full font-medium flex items-center gap-1 ${
+                saveStatus === 'saving' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
+                saveStatus === 'error' ? 'bg-red-50 text-red-600 border border-red-200' :
+                'bg-emerald-50 text-emerald-600 border border-emerald-200'
+              }`}>
+                {saveStatus === 'saving' ? <Cloud className="w-3 h-3 animate-pulse" /> :
+                 saveStatus === 'error' ? <CloudOff className="w-3 h-3" /> :
+                 <Save className="w-3 h-3" />}
+                {saveStatus === 'saving' ? '저장중' : saveStatus === 'error' ? '오류' : '저장됨'}
+              </span>
+            )}
             {/* 오늘 연습 횟수 */}
             <span className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded-full font-medium border border-indigo-100">
               오늘 {practiceCount}건
