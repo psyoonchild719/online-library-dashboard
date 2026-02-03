@@ -739,24 +739,24 @@ export default function OnlineLibraryDashboard() {
       </div>
 
       {/* 학습 버튼들 - 가운데 정렬 */}
-      <div className="mb-6 flex justify-center">
-        <div className="flex items-center gap-2">
+      <div className="mb-4 flex justify-center">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={handleEnterLibrary}
-            className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+            className="flex items-center justify-center gap-1.5 bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors text-xs"
           >
-            <ExternalLink className="w-4 h-4" />
-            도서관 입실하기
+            <ExternalLink className="w-3.5 h-3.5" />
+            도서관 입실
           </button>
 
           <Link
             href="/qna"
-            className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm relative"
+            className="flex items-center justify-center gap-1.5 bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-colors text-xs relative"
           >
-            <MessageSquare className="w-4 h-4" />
+            <MessageSquare className="w-3.5 h-3.5" />
             토론의 방
             {newPostsCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[10px] font-medium w-5 h-5 rounded-full flex items-center justify-center shadow-sm animate-pulse">
+              <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[9px] font-medium w-4 h-4 rounded-full flex items-center justify-center shadow-sm animate-pulse">
                 {newPostsCount}
               </span>
             )}
@@ -764,26 +764,26 @@ export default function OnlineLibraryDashboard() {
 
           <Link
             href="/interview"
-            className="flex items-center justify-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors text-sm"
+            className="flex items-center justify-center gap-1.5 bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition-colors text-xs"
           >
-            <Brain className="w-4 h-4" />
+            <Brain className="w-3.5 h-3.5" />
             면접 연습
           </Link>
 
           {!isCurrentUserOnline ? (
             <button
               onClick={handleStartStudy}
-              className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              className="flex items-center justify-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs"
             >
-              <Clock className="w-4 h-4" />
+              <Clock className="w-3.5 h-3.5" />
               학습 시작
             </button>
           ) : (
             <button
               onClick={handleExit}
-              className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+              className="flex items-center justify-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors text-xs"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
               학습 종료
             </button>
           )}
