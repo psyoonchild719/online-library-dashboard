@@ -348,10 +348,10 @@ export default function AdminPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100">
-          <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-800 mb-2">로그인이 필요합니다</h2>
-          <a href="/interview" className="text-indigo-600 hover:underline">
+        <div className="bg-white rounded-xl p-6 max-w-sm w-full text-center shadow-lg border border-gray-100">
+          <AlertCircle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
+          <h2 className="text-sm font-bold text-gray-800 mb-2">로그인이 필요합니다</h2>
+          <a href="/interview" className="text-xs text-indigo-600 hover:underline">
             면접 시뮬레이터로 이동하여 로그인
           </a>
         </div>
@@ -363,11 +363,11 @@ export default function AdminPage() {
   if (!ALLOWED_MEMBERS[user.email]) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl border border-gray-100">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-800 mb-2">스터디 멤버만 접근 가능</h2>
-          <p className="text-gray-500 mb-4">{user.email}</p>
-          <button onClick={signOut} className="text-gray-500 hover:text-gray-700">
+        <div className="bg-white rounded-xl p-6 max-w-sm w-full text-center shadow-lg border border-gray-100">
+          <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
+          <h2 className="text-sm font-bold text-gray-800 mb-2">스터디 멤버만 접근 가능</h2>
+          <p className="text-xs text-gray-500 mb-3">{user.email}</p>
+          <button onClick={signOut} className="text-xs text-gray-500 hover:text-gray-700">
             로그아웃
           </button>
         </div>
@@ -379,63 +379,63 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-4xl mx-auto px-3 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <a href="/interview" className="text-gray-400 hover:text-gray-600 transition p-1">
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </a>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
-                <Brain className="w-4 h-4 text-violet-600" />
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-6 bg-violet-100 rounded-lg flex items-center justify-center">
+                <Brain className="w-3 h-3 text-violet-600" />
               </div>
-              <h1 className="text-lg font-bold text-gray-800">사례 관리</h1>
+              <h1 className="text-sm font-bold text-gray-800">사례 관리</h1>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-full border border-gray-200">
               <img
                 src={user.user_metadata?.avatar_url || '/default-avatar.png'}
                 alt="프로필"
-                className="w-6 h-6 rounded-full"
+                className="w-5 h-5 rounded-full"
               />
-              <span className="text-sm text-gray-700 font-medium">
+              <span className="text-xs text-gray-700 font-medium">
                 {ALLOWED_MEMBERS[user.email]?.name}
               </span>
             </div>
             <button onClick={signOut} className="text-gray-400 hover:text-gray-600 transition p-1" title="로그아웃">
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="max-w-4xl mx-auto px-3 py-4">
         {/* 필터 탭 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-4">
           {/* 전공/윤리 탭 */}
-          <div className="flex gap-2 mb-3">
+          <div className="flex gap-1.5 mb-2">
             <button
               onClick={() => { setCaseType('major'); setSourceFilter('all'); }}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                caseType === 'major' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                caseType === 'major' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               전공
             </button>
             <button
               onClick={() => { setCaseType('ethics'); setSourceFilter('all'); }}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                caseType === 'ethics' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                caseType === 'ethics' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               윤리
             </button>
           </div>
           {/* 기출/예상 필터 */}
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             <button
               onClick={() => setSourceFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
+              className={`px-2 py-1 rounded-lg text-[10px] transition ${
                 sourceFilter === 'all' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -443,16 +443,16 @@ export default function AdminPage() {
             </button>
             <button
               onClick={() => setSourceFilter('exam')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
-                sourceFilter === 'exam' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              className={`px-2 py-1 rounded-lg text-[10px] transition ${
+                sourceFilter === 'exam' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               📚 기출
             </button>
             <button
               onClick={() => setSourceFilter('predicted')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition ${
-                sourceFilter === 'predicted' ? 'bg-violet-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              className={`px-2 py-1 rounded-lg text-[10px] transition ${
+                sourceFilter === 'predicted' ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               🔮 예상
@@ -461,8 +461,8 @@ export default function AdminPage() {
         </div>
 
         {/* 상단 액션 */}
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-600">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-xs text-gray-600">
             {caseType === 'major' ? '전공' : '윤리'} · {sourceFilter === 'all' ? '전체' : sourceFilter === 'exam' ? '기출' : '예상'}
             <span className="font-bold text-indigo-600 ml-1">{cases.length}</span>개
           </p>
@@ -481,24 +481,24 @@ export default function AdminPage() {
               });
               setShowAddCase(true);
             }}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-indigo-700 transition shadow-lg shadow-indigo-200"
+            className="flex items-center gap-1 bg-indigo-100 text-indigo-700 px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-200 transition"
           >
-            <Plus className="w-5 h-5" />
-            새 사례 추가
+            <Plus className="w-3.5 h-3.5" />
+            새 사례
           </button>
         </div>
 
         {/* 새 사례 추가 폼 */}
         {showAddCase && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4 shadow-sm">
-            <h3 className="font-bold text-gray-800 mb-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-3 mb-3 shadow-sm">
+            <h3 className="font-bold text-xs text-gray-800 mb-3">
               새 {newCase.type === 'major' ? '전공' : '윤리'} 사례 추가
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* 유형 및 소스 선택 */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">유형</label>
+                  <label className="block text-[10px] font-medium text-gray-700 mb-1">유형</label>
                   <select
                     value={newCase.type}
                     onChange={(e) => setNewCase({
@@ -506,18 +506,18 @@ export default function AdminPage() {
                       type: e.target.value,
                       category: e.target.value === 'major' ? '우울/불안' : '비밀유지/기록'
                     })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="major">전공</option>
                     <option value="ethics">윤리</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">구분</label>
+                  <label className="block text-[10px] font-medium text-gray-700 mb-1">구분</label>
                   <select
                     value={newCase.source}
                     onChange={(e) => setNewCase({ ...newCase, source: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="exam">📚 기출</option>
                     <option value="predicted">🔮 예상</option>
@@ -528,24 +528,24 @@ export default function AdminPage() {
               {newCase.source === 'exam' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-[10px] font-medium text-gray-700 mb-1">
                       고유번호 * <span className="text-gray-400 font-normal">(예: 전공 1, 윤리 3)</span>
                     </label>
                     <input
                       type="text"
                       value={newCase.case_id || ''}
                       onChange={(e) => setNewCase({ ...newCase, case_id: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                       placeholder="예: 전공 1"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">출제 연도 (쉼표로 구분)</label>
+                    <label className="block text-[10px] font-medium text-gray-700 mb-1">출제 연도 (쉼표로 구분)</label>
                     <input
                       type="text"
                       value={newCase.years || ''}
                       onChange={(e) => setNewCase({ ...newCase, years: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                       placeholder="예: 2018, 2019, 2021"
                     />
                   </div>
@@ -553,29 +553,29 @@ export default function AdminPage() {
               )}
               {/* 예상인 경우 자동 생성 안내 */}
               {newCase.source === 'predicted' && (
-                <div className="bg-violet-50 border border-violet-200 rounded-xl p-3">
-                  <p className="text-sm text-violet-700">
+                <div className="bg-violet-50 border border-violet-200 rounded-lg p-2">
+                  <p className="text-[10px] text-violet-700">
                     💡 예상 사례의 고유번호는 저장 시 자동 생성됩니다 (예: 예상-전공 1)
                   </p>
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">제목 *</label>
+                <label className="block text-[10px] font-medium text-gray-700 mb-1">제목 *</label>
                 <input
                   type="text"
                   value={newCase.title}
                   onChange={(e) => setNewCase({ ...newCase, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="예: 30대 여성 섭식장애"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
+                  <label className="block text-[10px] font-medium text-gray-700 mb-1">카테고리</label>
                   <select
                     value={newCase.category}
                     onChange={(e) => setNewCase({ ...newCase, category: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                     {(newCase.type === 'major' ? MAJOR_CATEGORIES : ETHICS_CATEGORIES).map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -583,7 +583,7 @@ export default function AdminPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[10px] font-medium text-gray-700 mb-1">
                     {newCase.type === 'major' ? '진단' : '주제'}
                   </label>
                   <input
@@ -593,33 +593,33 @@ export default function AdminPage() {
                       ...newCase,
                       [newCase.type === 'major' ? 'diagnosis' : 'topic']: e.target.value
                     })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                     placeholder={newCase.type === 'major' ? '예: 신경성 식욕부진증' : '예: 다중관계'}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">사례 내용 *</label>
+                <label className="block text-[10px] font-medium text-gray-700 mb-1">사례 내용 *</label>
                 <textarea
                   value={newCase.case_text}
                   onChange={(e) => setNewCase({ ...newCase, case_text: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 h-32"
+                  className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 h-24"
                   placeholder="사례 내용을 입력하세요..."
                 />
               </div>
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => setShowAddCase(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50"
+                  className="px-2 py-1 text-xs border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
                 >
                   취소
                 </button>
                 <button
                   onClick={handleAddCase}
                   disabled={saving}
-                  className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50"
+                  className="flex items-center gap-1 bg-indigo-100 text-indigo-700 px-2 py-1 rounded-lg text-xs font-medium hover:bg-indigo-200 disabled:opacity-50"
                 >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                   저장
                 </button>
               </div>
@@ -629,24 +629,24 @@ export default function AdminPage() {
 
         {/* 로딩 */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
           </div>
         ) : cases.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-            <p className="text-gray-500">등록된 예상문제가 없습니다.</p>
+          <div className="bg-white rounded-xl border border-gray-200 p-6 text-center">
+            <p className="text-xs text-gray-500">등록된 예상문제가 없습니다.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {cases.map(caseItem => (
-              <div key={caseItem.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+              <div key={caseItem.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                 {/* 사례 헤더 */}
-                <div className="p-4 flex items-start justify-between">
+                <div className="p-3 flex items-start justify-between">
                   <div className="flex-1 cursor-pointer" onClick={() => setExpandedCase(expandedCase === caseItem.id ? null : caseItem.id)}>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-1.5 mb-1">
                       {/* 고유번호 */}
                       {caseItem.case_id && (
-                        <span className={`text-xs px-2 py-0.5 rounded font-mono font-medium ${
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
                           caseItem.source === 'exam'
                             ? 'bg-blue-100 text-blue-700'
                             : 'bg-violet-100 text-violet-700'
@@ -654,36 +654,36 @@ export default function AdminPage() {
                           {caseItem.case_id}
                         </span>
                       )}
-                      <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full font-medium">
+                      <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded-full font-medium">
                         {caseItem.category}
                       </span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-[10px] text-gray-400">
                         질문 {caseItem.interview_questions?.length || 0}개
                       </span>
                     </div>
-                    <h3 className="font-bold text-gray-800">{caseItem.title}</h3>
+                    <h3 className="font-bold text-xs text-gray-800">{caseItem.title}</h3>
                     {caseItem.diagnosis && (
-                      <p className="text-sm text-gray-500">진단: {caseItem.diagnosis}</p>
+                      <p className="text-[10px] text-gray-500">진단: {caseItem.diagnosis}</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     <button
                       onClick={() => setEditingCase(caseItem)}
-                      className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                      className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
                     >
-                      <Edit3 className="w-4 h-4" />
+                      <Edit3 className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => handleDeleteCase(caseItem.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => setExpandedCase(expandedCase === caseItem.id ? null : caseItem.id)}
-                      className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition"
+                      className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition"
                     >
-                      {expandedCase === caseItem.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      {expandedCase === caseItem.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                     </button>
                   </div>
                 </div>
@@ -692,78 +692,78 @@ export default function AdminPage() {
                 {expandedCase === caseItem.id && (
                   <div className="border-t border-gray-100">
                     {/* 사례 내용 */}
-                    <div className="p-4 bg-gray-50">
-                      <p className="text-sm text-gray-600 whitespace-pre-wrap">{caseItem.case_text}</p>
+                    <div className="p-3 bg-gray-50">
+                      <p className="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{caseItem.case_text}</p>
                     </div>
 
                     {/* 질문 목록 */}
-                    <div className="p-4 border-t border-gray-100">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-gray-700">질문 목록</h4>
+                    <div className="p-3 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-xs text-gray-700">질문 목록</h4>
                         <button
                           onClick={() => setShowAddQuestion(caseItem.id)}
-                          className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700"
+                          className="flex items-center gap-0.5 text-[10px] text-indigo-600 hover:text-indigo-700"
                         >
-                          <Plus className="w-4 h-4" />
+                          <Plus className="w-3 h-3" />
                           질문 추가
                         </button>
                       </div>
 
                       {/* 새 질문 추가 폼 */}
                       {showAddQuestion === caseItem.id && (
-                        <div className="bg-indigo-50 rounded-xl p-4 mb-3 border border-indigo-100">
-                          <div className="space-y-3">
+                        <div className="bg-indigo-50 rounded-lg p-3 mb-2 border border-indigo-100">
+                          <div className="space-y-2">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">질문 *</label>
+                              <label className="block text-[10px] font-medium text-gray-700 mb-1">질문 *</label>
                               <input
                                 type="text"
                                 value={newQuestion.question}
                                 onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs"
                                 placeholder="질문 내용"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">핵심 포인트 (줄바꿈으로 구분)</label>
+                              <label className="block text-[10px] font-medium text-gray-700 mb-1">핵심 포인트 (줄바꿈으로 구분)</label>
                               <textarea
                                 value={newQuestion.key_points}
                                 onChange={(e) => setNewQuestion({ ...newQuestion, key_points: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm h-20"
+                                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs h-16"
                                 placeholder="포인트1&#10;포인트2&#10;포인트3"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">Tip</label>
+                              <label className="block text-[10px] font-medium text-gray-700 mb-1">Tip</label>
                               <input
                                 type="text"
                                 value={newQuestion.tip}
                                 onChange={(e) => setNewQuestion({ ...newQuestion, tip: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs"
                                 placeholder="팁 내용"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">📝 모범 답안</label>
+                              <label className="block text-[10px] font-medium text-gray-700 mb-1">📝 모범 답안</label>
                               <textarea
                                 value={newQuestion.model_answer}
                                 onChange={(e) => setNewQuestion({ ...newQuestion, model_answer: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm h-32"
+                                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs h-24"
                                 placeholder="모범 답안을 입력하세요..."
                               />
                             </div>
-                            <div className="flex gap-2 justify-end">
+                            <div className="flex gap-1.5 justify-end">
                               <button
                                 onClick={() => setShowAddQuestion(null)}
-                                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+                                className="px-2 py-1 border border-gray-300 rounded-lg text-[10px] text-gray-600 hover:bg-gray-50"
                               >
                                 취소
                               </button>
                               <button
                                 onClick={() => handleAddQuestion(caseItem.id)}
                                 disabled={saving}
-                                className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+                                className="flex items-center gap-1 bg-indigo-100 text-indigo-700 px-2 py-1 rounded-lg text-[10px] font-medium hover:bg-indigo-200 disabled:opacity-50"
                               >
-                                {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                {saving ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Save className="w-2.5 h-2.5" />}
                                 저장
                               </button>
                             </div>
@@ -773,51 +773,51 @@ export default function AdminPage() {
 
                       {/* 질문 리스트 */}
                       {caseItem.interview_questions?.length > 0 ? (
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                           {caseItem.interview_questions
                             .sort((a, b) => a.order_num - b.order_num)
                             .map((q, idx) => (
-                              <div key={q.id} className="bg-gray-50 rounded-xl p-3 border border-gray-200">
+                              <div key={q.id} className="bg-gray-50 rounded-lg p-2 border border-gray-200">
                                 {editingQuestion?.id === q.id ? (
-                                  <div className="space-y-2">
+                                  <div className="space-y-1.5">
                                     <input
                                       type="text"
                                       value={editingQuestion.question}
                                       onChange={(e) => setEditingQuestion({ ...editingQuestion, question: e.target.value })}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs"
                                     />
                                     <textarea
                                       value={Array.isArray(editingQuestion.key_points) ? editingQuestion.key_points.join('\n') : editingQuestion.key_points}
                                       onChange={(e) => setEditingQuestion({ ...editingQuestion, key_points: e.target.value })}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm h-20"
+                                      className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs h-16"
                                       placeholder="핵심 포인트 (줄바꿈 구분)"
                                     />
                                     <input
                                       type="text"
                                       value={editingQuestion.tip || ''}
                                       onChange={(e) => setEditingQuestion({ ...editingQuestion, tip: e.target.value })}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs"
                                       placeholder="Tip"
                                     />
                                     <textarea
                                       value={editingQuestion.model_answer || ''}
                                       onChange={(e) => setEditingQuestion({ ...editingQuestion, model_answer: e.target.value })}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm h-24"
+                                      className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs h-20"
                                       placeholder="📝 모범 답안"
                                     />
-                                    <div className="flex gap-2 justify-end">
+                                    <div className="flex gap-1.5 justify-end">
                                       <button
                                         onClick={() => setEditingQuestion(null)}
-                                        className="px-3 py-1 border border-gray-300 rounded-lg text-xs text-gray-600"
+                                        className="px-2 py-1 border border-gray-300 rounded-lg text-[10px] text-gray-600"
                                       >
                                         취소
                                       </button>
                                       <button
                                         onClick={() => handleUpdateQuestion(editingQuestion)}
                                         disabled={saving}
-                                        className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs"
+                                        className="flex items-center gap-1 bg-indigo-100 text-indigo-700 px-2 py-1 rounded-lg text-[10px] font-medium hover:bg-indigo-200"
                                       >
-                                        {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                        {saving ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Save className="w-2.5 h-2.5" />}
                                         저장
                                       </button>
                                     </div>
@@ -825,37 +825,37 @@ export default function AdminPage() {
                                 ) : (
                                   <div className="flex items-start justify-between">
                                     <div className="flex-1">
-                                      <p className="text-sm font-medium text-gray-800 mb-1">
+                                      <p className="text-xs font-medium text-gray-800 mb-0.5">
                                         Q{idx + 1}. {q.question}
                                       </p>
                                       {q.key_points?.length > 0 && (
-                                        <ul className="text-xs text-gray-500 ml-4">
+                                        <ul className="text-[10px] text-gray-500 ml-3">
                                           {q.key_points.map((point, i) => (
                                             <li key={i}>• {point}</li>
                                           ))}
                                         </ul>
                                       )}
                                       {q.tip && (
-                                        <p className="text-xs text-violet-600 mt-1">💡 {q.tip}</p>
+                                        <p className="text-[10px] text-violet-600 mt-0.5">💡 {q.tip}</p>
                                       )}
                                       {q.model_answer && (
-                                        <p className="text-xs text-emerald-600 mt-1 bg-emerald-50 p-2 rounded">
+                                        <p className="text-[10px] text-emerald-600 mt-0.5 bg-emerald-50 p-1.5 rounded">
                                           📝 모범 답안 있음
                                         </p>
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-1 ml-2">
+                                    <div className="flex items-center gap-0.5 ml-1">
                                       <button
                                         onClick={() => setEditingQuestion(q)}
                                         className="p-1 text-gray-400 hover:text-indigo-600"
                                       >
-                                        <Edit3 className="w-3 h-3" />
+                                        <Edit3 className="w-2.5 h-2.5" />
                                       </button>
                                       <button
                                         onClick={() => handleDeleteQuestion(q.id)}
                                         className="p-1 text-gray-400 hover:text-red-600"
                                       >
-                                        <Trash2 className="w-3 h-3" />
+                                        <Trash2 className="w-2.5 h-2.5" />
                                       </button>
                                     </div>
                                   </div>
@@ -864,7 +864,7 @@ export default function AdminPage() {
                             ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-gray-400 text-center py-4">등록된 질문이 없습니다.</p>
+                        <p className="text-xs text-gray-400 text-center py-3">등록된 질문이 없습니다.</p>
                       )}
                     </div>
                   </div>
@@ -877,43 +877,43 @@ export default function AdminPage() {
         {/* 사례 수정 모달 */}
         {editingCase && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-lg text-gray-800">사례 수정</h3>
+            <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold text-sm text-gray-800">사례 수정</h3>
                 <button onClick={() => setEditingCase(null)} className="text-gray-400 hover:text-gray-600">
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* 고유번호 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-[10px] font-medium text-gray-700 mb-1">
                     고유번호 {editingCase.source === 'exam' ? '(기출)' : '(예상)'}
                   </label>
                   <input
                     type="text"
                     value={editingCase.case_id || ''}
                     onChange={(e) => setEditingCase({ ...editingCase, case_id: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl font-mono"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg font-mono"
                     placeholder={editingCase.source === 'exam' ? '예: 전공 1' : '예: 예상-전공 1'}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
+                  <label className="block text-[10px] font-medium text-gray-700 mb-1">제목</label>
                   <input
                     type="text"
                     value={editingCase.title}
                     onChange={(e) => setEditingCase({ ...editingCase, title: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
+                    <label className="block text-[10px] font-medium text-gray-700 mb-1">카테고리</label>
                     <select
                       value={editingCase.category}
                       onChange={(e) => setEditingCase({ ...editingCase, category: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-xl"
+                      className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg"
                     >
                       {(editingCase.type === 'ethics' ? ETHICS_CATEGORIES : MAJOR_CATEGORIES).map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -921,7 +921,7 @@ export default function AdminPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-[10px] font-medium text-gray-700 mb-1">
                       {editingCase.type === 'ethics' ? '주제' : '진단'}
                     </label>
                     <input
@@ -931,31 +931,31 @@ export default function AdminPage() {
                         ...editingCase,
                         [editingCase.type === 'ethics' ? 'topic' : 'diagnosis']: e.target.value
                       })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-xl"
+                      className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">사례 내용</label>
+                  <label className="block text-[10px] font-medium text-gray-700 mb-1">사례 내용</label>
                   <textarea
                     value={editingCase.case_text}
                     onChange={(e) => setEditingCase({ ...editingCase, case_text: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-xl h-40"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg h-32"
                   />
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => setEditingCase(null)}
-                    className="px-4 py-2 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50"
+                    className="px-2 py-1 text-xs border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
                   >
                     취소
                   </button>
                   <button
                     onClick={() => handleUpdateCase(editingCase)}
                     disabled={saving}
-                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50"
+                    className="flex items-center gap-1 bg-indigo-100 text-indigo-700 px-2 py-1 rounded-lg text-xs font-medium hover:bg-indigo-200 disabled:opacity-50"
                   >
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                     저장
                   </button>
                 </div>
