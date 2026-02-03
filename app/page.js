@@ -740,10 +740,10 @@ export default function OnlineLibraryDashboard() {
 
       {/* 학습 버튼들 - 가운데 정렬 */}
       <div className="mb-4 flex justify-center">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-sm px-2 py-1.5 rounded-xl shadow-sm border">
           <button
             onClick={handleEnterLibrary}
-            className="flex items-center justify-center gap-1.5 bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors text-xs"
+            className="flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-all text-xs font-medium"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             도서관 입실
@@ -751,7 +751,7 @@ export default function OnlineLibraryDashboard() {
 
           <Link
             href="/qna"
-            className="flex items-center justify-center gap-1.5 bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-colors text-xs relative"
+            className="flex items-center justify-center gap-1.5 bg-violet-50 text-violet-700 border border-violet-200 px-3 py-1.5 rounded-lg hover:bg-violet-100 transition-all text-xs font-medium relative"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             토론의 방
@@ -764,7 +764,7 @@ export default function OnlineLibraryDashboard() {
 
           <Link
             href="/interview"
-            className="flex items-center justify-center gap-1.5 bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition-colors text-xs"
+            className="flex items-center justify-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-all text-xs font-medium"
           >
             <Brain className="w-3.5 h-3.5" />
             면접 연습
@@ -773,7 +773,7 @@ export default function OnlineLibraryDashboard() {
           {!isCurrentUserOnline ? (
             <button
               onClick={handleStartStudy}
-              className="flex items-center justify-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors text-xs"
+              className="flex items-center justify-center gap-1.5 bg-sky-50 text-sky-700 border border-sky-200 px-3 py-1.5 rounded-lg hover:bg-sky-100 transition-all text-xs font-medium"
             >
               <Clock className="w-3.5 h-3.5" />
               학습 시작
@@ -781,7 +781,7 @@ export default function OnlineLibraryDashboard() {
           ) : (
             <button
               onClick={handleExit}
-              className="flex items-center justify-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors text-xs"
+              className="flex items-center justify-center gap-1.5 bg-rose-50 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-lg hover:bg-rose-100 transition-all text-xs font-medium"
             >
               <LogOut className="w-3.5 h-3.5" />
               학습 종료
