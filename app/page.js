@@ -877,10 +877,10 @@ export default function OnlineLibraryDashboard() {
         </div>
       </div>
 
-      {/* 멤버 현황 | 오늘의 학습시간 | 실시간 기록 (한 줄) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* 멤버 현황 */}
-        <div className="bg-white rounded-xl shadow-sm border p-3">
+      {/* 멤버 현황 | 오늘의 학습시간 | 실시간 기록 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {/* 멤버 현황 - 모바일에서 전체 너비 */}
+        <div className="col-span-2 sm:col-span-1 bg-white rounded-xl shadow-sm border p-3">
           <h2 className="text-sm font-semibold mb-2">👥 멤버 현황</h2>
           <div className="grid grid-cols-2 gap-1.5">
             {members.map(member => {
