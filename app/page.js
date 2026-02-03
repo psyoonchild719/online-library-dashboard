@@ -343,11 +343,11 @@ export default function OnlineLibraryDashboard() {
     }
   };
 
-  // 토론의 방 새 글 개수 로드 (12시간 이내)
+  // 토론의 방 새 글 개수 로드 (24시간 이내)
   const loadNewPostsCount = async () => {
     try {
       const cutoff = new Date();
-      cutoff.setHours(cutoff.getHours() - 12);
+      cutoff.setHours(cutoff.getHours() - 24);
 
       const { count, error } = await supabase
         .from('questions')
