@@ -46,8 +46,8 @@ export default function InterviewSimulator() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [sourceFilter, setSourceFilter] = useState('exam'); // 'exam' | 'predicted' | 'all'
   const [practiceCount, setPracticeCount] = useState(0);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [checkedPoints, setCheckedPoints] = useState([]);
+  const [userAnswers, setUserAnswers] = useState({}); // 질문별 답안 저장: { 'caseId-questionIndex': 'answer' }
+  const [checkedPointsMap, setCheckedPointsMap] = useState({}); // 질문별 체크포인트: { 'caseId-questionIndex': [0, 1, 2] }
 
   // DB에서 사례 로드
   const loadCasesFromDB = useCallback(async () => {
@@ -248,10 +248,34 @@ export default function InterviewSimulator() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const resetAnswerState = () => {
+  // 현재 질문의 고유 키 생성
+  const getAnswerKey = () => {
+    if (!currentCase) return null;
+    return `${currentCase.id}-${currentQuestionIndex}`;
+  };
+
+  // 현재 질문의 답안 가져오기
+  const getCurrentAnswer = () => {
+    const key = getAnswerKey();
+    return key ? (userAnswers[key] || '') : '';
+  };
+
+  // 현재 질문의 답안 저장
+  const setCurrentAnswer = (answer) => {
+    const key = getAnswerKey();
+    if (key) {
+      setUserAnswers(prev => ({ ...prev, [key]: answer }));
+    }
+  };
+
+  // 현재 질문의 체크포인트 가져오기
+  const getCurrentCheckedPoints = () => {
+    const key = getAnswerKey();
+    return key ? (checkedPointsMap[key] || []) : [];
+  };
+
+  const resetViewState = () => {
     setShowAnswer(false);
-    setUserAnswer('');
-    setCheckedPoints([]);
   };
 
   const nextCase = () => {
@@ -260,7 +284,7 @@ export default function InterviewSimulator() {
     if (currentCaseIndex < filteredCases.length - 1) {
       setCurrentCaseIndex(prev => prev + 1);
       setCurrentQuestionIndex(0);
-      resetAnswerState();
+      resetViewState();
       setTimer(0);
     }
   };
@@ -269,7 +293,7 @@ export default function InterviewSimulator() {
     if (currentCaseIndex > 0) {
       setCurrentCaseIndex(prev => prev - 1);
       setCurrentQuestionIndex(0);
-      resetAnswerState();
+      resetViewState();
       setTimer(0);
     }
   };
@@ -277,21 +301,28 @@ export default function InterviewSimulator() {
   const nextQuestion = () => {
     if (currentQuestion && currentQuestionIndex < currentCase.questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
-      resetAnswerState();
+      resetViewState();
     }
   };
 
   const prevQuestion = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
-      resetAnswerState();
+      resetViewState();
     }
   };
 
   const toggleCheckPoint = (idx) => {
-    setCheckedPoints(prev =>
-      prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
-    );
+    const key = getAnswerKey();
+    if (!key) return;
+
+    setCheckedPointsMap(prev => {
+      const current = prev[key] || [];
+      const updated = current.includes(idx)
+        ? current.filter(i => i !== idx)
+        : [...current, idx];
+      return { ...prev, [key]: updated };
+    });
   };
 
   const randomCase = () => {
@@ -534,7 +565,7 @@ export default function InterviewSimulator() {
             <button
               onClick={() => {
                 setTimer(0);
-                resetAnswerState();
+                resetViewState();
               }}
               className="p-1.5 bg-white rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition border border-gray-200"
               title="처음부터 다시"
@@ -649,14 +680,14 @@ export default function InterviewSimulator() {
                 {/* 답안 작성 영역 */}
                 <div className="mb-3">
                   <textarea
-                    value={userAnswer}
-                    onChange={(e) => setUserAnswer(e.target.value)}
+                    value={getCurrentAnswer()}
+                    onChange={(e) => setCurrentAnswer(e.target.value)}
                     placeholder="여기에 답안을 작성하세요..."
                     className="w-full h-24 p-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 text-sm text-gray-700 placeholder-gray-400"
                   />
                   <div className="flex justify-between items-center mt-1.5">
-                    <span className="text-[10px] text-gray-400">{userAnswer.length}자</span>
-                    {userAnswer.length > 0 && !showAnswer && (
+                    <span className="text-[10px] text-gray-400">{getCurrentAnswer().length}자</span>
+                    {getCurrentAnswer().length > 0 && !showAnswer && (
                       <span className="text-[10px] text-indigo-500">답안 작성 후 핵심 포인트를 확인하세요</span>
                     )}
                   </div>
@@ -681,7 +712,7 @@ export default function InterviewSimulator() {
                         핵심 포인트 자기 평가
                       </h4>
                       <span className="text-xs text-amber-600 font-medium">
-                        {checkedPoints.length} / {currentQuestion.keyPoints.length}
+                        {getCurrentCheckedPoints().length} / {currentQuestion.keyPoints.length}
                       </span>
                     </div>
                     <ul className="space-y-2">
@@ -690,19 +721,19 @@ export default function InterviewSimulator() {
                           key={idx}
                           onClick={() => toggleCheckPoint(idx)}
                           className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition text-xs ${
-                            checkedPoints.includes(idx)
+                            getCurrentCheckedPoints().includes(idx)
                               ? 'bg-emerald-100 border border-emerald-300'
                               : 'bg-white border border-gray-200 hover:border-amber-300'
                           }`}
                         >
                           <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition ${
-                            checkedPoints.includes(idx)
+                            getCurrentCheckedPoints().includes(idx)
                               ? 'bg-emerald-500 border-emerald-500 text-white'
                               : 'border-gray-300'
                           }`}>
-                            {checkedPoints.includes(idx) && <CheckCircle className="w-2.5 h-2.5" />}
+                            {getCurrentCheckedPoints().includes(idx) && <CheckCircle className="w-2.5 h-2.5" />}
                           </div>
-                          <span className={`${checkedPoints.includes(idx) ? 'text-emerald-800' : 'text-gray-700'}`}>
+                          <span className={`${getCurrentCheckedPoints().includes(idx) ? 'text-emerald-800' : 'text-gray-700'}`}>
                             {point}
                           </span>
                         </li>
@@ -731,7 +762,7 @@ export default function InterviewSimulator() {
                         </details>
                       </div>
                     )}
-                    {checkedPoints.length === currentQuestion.keyPoints.length && (
+                    {getCurrentCheckedPoints().length === currentQuestion.keyPoints.length && (
                       <div className="mt-3 p-2 bg-emerald-100 rounded-lg border border-emerald-300">
                         <p className="text-emerald-700 font-medium text-center text-xs">
                           🎉 모든 핵심 포인트를 포함했습니다!
