@@ -738,9 +738,9 @@ export default function OnlineLibraryDashboard() {
         </div>
       </div>
 
-      {/* 학습 버튼들 - 가운데 정렬 */}
-      <div className="mb-4 flex justify-center">
-        <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-sm px-2 py-1.5 rounded-xl shadow-sm border">
+      {/* 학습 버튼들 */}
+      <div className="mb-4 bg-white rounded-xl shadow-sm border p-2 md:p-3">
+        <div className="flex items-center justify-center gap-1.5 flex-wrap">
           <button
             onClick={handleEnterLibrary}
             className="flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-all text-xs font-medium"
