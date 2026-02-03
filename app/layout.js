@@ -1,4 +1,11 @@
 import './globals.css'
+import { Inter } from 'next/font/google'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
 
 export const metadata = {
   title: '📚 2026 스터디룸',
@@ -21,8 +28,17 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ko">
-      <body>{children}</body>
+    <html lang="ko" className={inter.variable}>
+      <head>
+        {/* Pretendard 폰트 CDN */}
+        <link
+          rel="stylesheet"
+          as="style"
+          crossOrigin="anonymous"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+        />
+      </head>
+      <body className="font-pretendard">{children}</body>
     </html>
   )
 }
