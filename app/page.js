@@ -756,7 +756,7 @@ export default function OnlineLibraryDashboard() {
             <MessageSquare className="w-4 h-4" />
             토론의 방
             {newPostsCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm animate-pulse">
+              <span className="absolute -top-2 -right-2 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[10px] font-medium w-5 h-5 rounded-full flex items-center justify-center shadow-sm animate-pulse">
                 {newPostsCount}
               </span>
             )}
@@ -991,7 +991,7 @@ export default function OnlineLibraryDashboard() {
           <h2 className="text-sm font-semibold flex items-center gap-1.5">
             💬 토론의 방
             {newPostsCount > 0 && (
-              <span className="px-1.5 py-0.5 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[10px] font-medium rounded-full">
+              <span className="w-4 h-4 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[10px] font-medium rounded-full flex items-center justify-center">
                 {newPostsCount}
               </span>
             )}
