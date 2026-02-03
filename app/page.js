@@ -38,6 +38,7 @@ export default function OnlineLibraryDashboard() {
   const [todayStudyTime, setTodayStudyTime] = useState({}); // 오늘의 멤버별 학습시간
   const [totalStudyTimeMap, setTotalStudyTimeMap] = useState({}); // 멤버별 누적 학습시간 (분)
   const [newPostsCount, setNewPostsCount] = useState(0); // 토론의 방 새 글 개수
+  const [recentQuestions, setRecentQuestions] = useState([]); // 토론의 방 최근 글
 
   // 인증 상태 확인
   useEffect(() => {
@@ -246,8 +247,9 @@ export default function OnlineLibraryDashboard() {
       // 누적 학습시간 계산
       await loadTotalStudyTime();
 
-      // 토론의 방 새 글 개수
+      // 토론의 방 새 글 개수 및 최근 글
       await loadNewPostsCount();
+      await loadRecentQuestions();
 
     } catch (error) {
       console.error('Error loading data:', error);
@@ -360,6 +362,31 @@ export default function OnlineLibraryDashboard() {
     } catch (error) {
       console.error('Error loading new posts count:', error);
     }
+  };
+
+  // 토론의 방 최근 글 로드 (5개)
+  const loadRecentQuestions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('questions')
+        .select('id, title, created_at, members (name)')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (!error && data) {
+        setRecentQuestions(data);
+      }
+    } catch (error) {
+      console.error('Error loading recent questions:', error);
+    }
+  };
+
+  // 24시간 이내 작성된 글인지 확인
+  const isNewPost = (dateString) => {
+    const postDate = new Date(dateString);
+    const now = new Date();
+    const hoursDiff = (now - postDate) / (1000 * 60 * 60);
+    return hoursDiff <= 24;
   };
 
   // 학습 시작 처리 (Google Meet 없이)
@@ -797,7 +824,7 @@ export default function OnlineLibraryDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[10px] text-gray-500">02.06 (금)</p>
-                    <h3 className="font-bold text-gray-900 text-xs">필기</h3>
+                    <h3 className="font-bold text-gray-900 text-xs">임상심리전문가 필기</h3>
                   </div>
                   <p className={`text-lg font-black ${
                     isToday ? 'text-red-600' :
@@ -832,7 +859,7 @@ export default function OnlineLibraryDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[10px] text-gray-500">02.07 (토)</p>
-                    <h3 className="font-bold text-gray-900 text-xs">면접</h3>
+                    <h3 className="font-bold text-gray-900 text-xs">임상심리전문가 면접</h3>
                   </div>
                   <p className={`text-lg font-black ${
                     isToday ? 'text-red-600' :
@@ -955,6 +982,42 @@ export default function OnlineLibraryDashboard() {
               ))
             )}
           </div>
+        </div>
+      </div>
+
+      {/* 토론의 방 미리보기 */}
+      <div className="mt-3 bg-white rounded-xl shadow-sm border p-3">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-semibold flex items-center gap-1.5">
+            💬 토론의 방
+            {newPostsCount > 0 && (
+              <span className="px-1.5 py-0.5 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[10px] font-medium rounded-full">
+                {newPostsCount}
+              </span>
+            )}
+          </h2>
+          <Link href="/qna" className="text-xs text-blue-600 hover:underline">
+            더보기 →
+          </Link>
+        </div>
+        <div className="space-y-1">
+          {recentQuestions.length === 0 ? (
+            <p className="text-xs text-gray-400 text-center py-2">아직 글이 없습니다</p>
+          ) : (
+            recentQuestions.map(q => (
+              <Link
+                key={q.id}
+                href="/qna"
+                className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <span className="text-xs text-gray-900 flex-1 truncate">{q.title}</span>
+                {isNewPost(q.created_at) && (
+                  <span className="px-1.5 py-0.5 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[9px] font-medium rounded-full animate-pulse">N</span>
+                )}
+                <span className="text-[10px] text-gray-400">{q.members?.name}</span>
+              </Link>
+            ))
+          )}
         </div>
       </div>
 
