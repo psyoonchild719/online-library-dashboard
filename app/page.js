@@ -764,20 +764,20 @@ export default function OnlineLibraryDashboard() {
       </div>
 
       {/* D-day 대시보드 */}
-      <div className="mb-6 bg-white rounded-xl shadow-sm border p-3 md:p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-red-500" />
-            <h2 className="text-base font-semibold">D-day</h2>
+      <div className="mb-4 bg-white rounded-xl shadow-sm border p-2 md:p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <Target className="w-3.5 h-3.5 text-red-500" />
+            <h2 className="text-sm font-semibold">D-day</h2>
           </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Calendar className="w-4 h-4" />
-            <span className="text-sm font-medium">
-              {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
+          <div className="flex items-center gap-1.5 text-gray-600">
+            <Calendar className="w-3.5 h-3.5" />
+            <span className="text-xs font-medium">
+              {new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', weekday: 'short' })}
             </span>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 gap-2">
           {/* 임상심리전문가 필기 */}
           {(() => {
             const examDate = new Date('2026-02-06');
@@ -789,17 +789,17 @@ export default function OnlineLibraryDashboard() {
             const isPast = diffDays < 0;
 
             return (
-              <div className={`p-4 rounded-xl border-2 ${
+              <div className={`p-2.5 rounded-lg border ${
                 isToday ? 'bg-red-50 border-red-300' :
                 isPast ? 'bg-gray-50 border-gray-200' :
                 'bg-gradient-to-br from-orange-50 to-red-50 border-orange-200'
               }`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">2026.02.06 (금)</p>
-                    <h3 className="font-bold text-gray-900 text-sm md:text-base">임상심리전문가 필기</h3>
+                    <p className="text-[10px] text-gray-500">02.06 (금)</p>
+                    <h3 className="font-bold text-gray-900 text-xs">필기</h3>
                   </div>
-                  <p className={`text-2xl md:text-3xl font-black ${
+                  <p className={`text-lg font-black ${
                     isToday ? 'text-red-600' :
                     isPast ? 'text-gray-400' :
                     diffDays <= 7 ? 'text-red-500' :
@@ -824,17 +824,17 @@ export default function OnlineLibraryDashboard() {
             const isPast = diffDays < 0;
 
             return (
-              <div className={`p-4 rounded-xl border-2 ${
+              <div className={`p-2.5 rounded-lg border ${
                 isToday ? 'bg-red-50 border-red-300' :
                 isPast ? 'bg-gray-50 border-gray-200' :
                 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200'
               }`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-500">2026.02.07 (토)</p>
-                    <h3 className="font-bold text-gray-900 text-sm md:text-base">임상심리전문가 면접</h3>
+                    <p className="text-[10px] text-gray-500">02.07 (토)</p>
+                    <h3 className="font-bold text-gray-900 text-xs">면접</h3>
                   </div>
-                  <p className={`text-2xl md:text-3xl font-black ${
+                  <p className={`text-lg font-black ${
                     isToday ? 'text-red-600' :
                     isPast ? 'text-gray-400' :
                     diffDays <= 7 ? 'text-red-500' :
@@ -850,12 +850,12 @@ export default function OnlineLibraryDashboard() {
         </div>
       </div>
 
-      {/* 멤버 현황 + 실시간 기록 (같은 줄) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* 왼쪽: 멤버 현황 */}
-        <div className="md:col-span-2 bg-white rounded-xl shadow-sm border p-3 md:p-4">
-          <h2 className="text-base font-semibold mb-2">👥 멤버 현황</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      {/* 멤버 현황 | 오늘의 학습시간 | 실시간 기록 (한 줄) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* 멤버 현황 */}
+        <div className="bg-white rounded-xl shadow-sm border p-3">
+          <h2 className="text-sm font-semibold mb-2">👥 멤버 현황</h2>
+          <div className="grid grid-cols-2 gap-1.5">
             {members.map(member => {
               const isOnline = onlineStatus[member.id] || false;
               const isMe = currentMember?.id === member.id;
@@ -863,27 +863,27 @@ export default function OnlineLibraryDashboard() {
                 <div
                   key={member.id}
                   onClick={() => handleUserClick(member)}
-                  className={`flex items-center gap-2 p-3 rounded-lg cursor-pointer transition-colors ${
-                    isMe ? 'bg-blue-50 border-2 border-blue-200' : 'bg-gray-50 hover:bg-gray-100'
+                  className={`flex items-center gap-1.5 p-2 rounded-lg cursor-pointer transition-colors ${
+                    isMe ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 hover:bg-gray-100'
                   }`}
                 >
                   <div className="relative flex-shrink-0">
                     {member.avatar?.startsWith('http') ? (
-                      <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full" />
+                      <img src={member.avatar} alt={member.name} className="w-6 h-6 rounded-full" />
                     ) : (
-                      <span className="text-xl">{member.avatar}</span>
+                      <span className="text-base">{member.avatar}</span>
                     )}
-                    <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${
+                    <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-white ${
                       isOnline ? 'bg-green-500' : 'bg-gray-300'
                     }`}></span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-gray-900 text-sm truncate">
+                    <p className="font-medium text-gray-900 text-xs truncate">
                       {member.name}
-                      {isMe && <span className="ml-1 text-xs text-blue-600">(나)</span>}
+                      {isMe && <span className="ml-0.5 text-[10px] text-blue-600">(나)</span>}
                     </p>
                     {isOnline && (
-                      <span className="text-xs text-green-600">학습중</span>
+                      <span className="text-[10px] text-green-600">학습중</span>
                     )}
                   </div>
                 </div>
@@ -892,46 +892,12 @@ export default function OnlineLibraryDashboard() {
           </div>
         </div>
 
-        {/* 오른쪽: 실시간 활동 로그 */}
-        <div className="bg-white rounded-xl shadow-sm border p-3 md:p-4">
-          <h2 className="text-base font-semibold mb-2">📋 실시간 기록</h2>
-          <div className="space-y-2 max-h-36 overflow-y-auto">
-            {activityLog.length === 0 ? (
-              <p className="text-gray-400 text-center py-8">활동 기록이 없습니다</p>
-            ) : (
-              activityLog.map(log => (
-                <div key={log.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg animate-fadeIn">
-                  {log.avatar?.startsWith('http') ? (
-                    <img src={log.avatar} alt={log.member_name} className="w-8 h-8 rounded-full" />
-                  ) : (
-                    <span className="text-xl">{log.avatar}</span>
-                  )}
-                  <div className="flex-1">
-                    <p className="text-sm">
-                      <span className="font-medium">{log.member_name}</span>
-                      <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
-                        log.action === 'enter' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {log.action === 'enter' ? '학습 시작' : '학습 종료'}
-                      </span>
-                    </p>
-                    <p className="text-xs text-gray-400">{formatTime(log.logged_at)}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 학습 시간 현황 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-6">
         {/* 오늘의 학습시간 */}
-        <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
-          <h2 className="text-lg font-semibold mb-4">⏱️ 오늘의 학습시간</h2>
-          <div className="space-y-3">
+        <div className="bg-white rounded-xl shadow-sm border p-3">
+          <h2 className="text-sm font-semibold mb-2">⏱️ 오늘의 학습시간</h2>
+          <div className="space-y-1.5 max-h-40 overflow-y-auto">
             {members.length === 0 ? (
-              <p className="text-gray-400 text-center py-4">멤버가 없습니다</p>
+              <p className="text-gray-400 text-center py-4 text-xs">멤버가 없습니다</p>
             ) : (
               members
                 .map(member => ({
@@ -940,17 +906,15 @@ export default function OnlineLibraryDashboard() {
                 }))
                 .sort((a, b) => b.todayMinutes - a.todayMinutes)
                 .map((member, index) => (
-                  <div key={member.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <span className="text-lg font-bold text-gray-400 w-6">{index + 1}</span>
+                  <div key={member.id} className="flex items-center gap-2 p-1.5 bg-gray-50 rounded-lg">
+                    <span className="text-xs font-bold text-gray-400 w-4">{index + 1}</span>
                     {member.avatar?.startsWith('http') ? (
-                      <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full" />
+                      <img src={member.avatar} alt={member.name} className="w-5 h-5 rounded-full" />
                     ) : (
-                      <span className="text-xl">{member.avatar}</span>
+                      <span className="text-sm">{member.avatar}</span>
                     )}
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{member.name}</p>
-                    </div>
-                    <p className="font-bold text-blue-600">
+                    <p className="font-medium text-xs flex-1 truncate">{member.name}</p>
+                    <p className="font-bold text-blue-600 text-xs">
                       {member.todayMinutes >= 60
                         ? `${Math.floor(member.todayMinutes / 60)}h ${member.todayMinutes % 60}m`
                         : `${member.todayMinutes}m`
@@ -962,44 +926,33 @@ export default function OnlineLibraryDashboard() {
           </div>
         </div>
 
-        {/* 누적 학습시간 랭킹 */}
-        <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
-          <h2 className="text-lg font-semibold mb-4">🏆 누적 학습시간 랭킹</h2>
-          <div className="space-y-3">
-            {members.length === 0 ? (
-              <p className="text-gray-400 text-center py-4">멤버가 없습니다</p>
+        {/* 실시간 기록 */}
+        <div className="bg-white rounded-xl shadow-sm border p-3">
+          <h2 className="text-sm font-semibold mb-2">📋 실시간 기록</h2>
+          <div className="space-y-1.5 max-h-40 overflow-y-auto">
+            {activityLog.length === 0 ? (
+              <p className="text-gray-400 text-center py-4 text-xs">활동 기록이 없습니다</p>
             ) : (
-              members
-                .map(member => ({
-                  ...member,
-                  totalMinutes: totalStudyTimeMap[member.id] || 0
-                }))
-                .sort((a, b) => b.totalMinutes - a.totalMinutes)
-                .map((member, index) => (
-                  <div key={member.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <span className={`text-lg font-bold w-6 ${
-                      index === 0 ? 'text-yellow-500' :
-                      index === 1 ? 'text-gray-400' :
-                      index === 2 ? 'text-amber-600' : 'text-gray-300'
-                    }`}>
-                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
-                    </span>
-                    {member.avatar?.startsWith('http') ? (
-                      <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full" />
-                    ) : (
-                      <span className="text-xl">{member.avatar}</span>
-                    )}
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{member.name}</p>
-                    </div>
-                    <p className="font-bold text-purple-600">
-                      {member.totalMinutes >= 60
-                        ? `${Math.floor(member.totalMinutes / 60)}h ${member.totalMinutes % 60}m`
-                        : `${member.totalMinutes}m`
-                      }
+              activityLog.map(log => (
+                <div key={log.id} className="flex items-center gap-1.5 p-1.5 bg-gray-50 rounded-lg animate-fadeIn">
+                  {log.avatar?.startsWith('http') ? (
+                    <img src={log.avatar} alt={log.member_name} className="w-5 h-5 rounded-full" />
+                  ) : (
+                    <span className="text-sm">{log.avatar}</span>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs">
+                      <span className="font-medium">{log.member_name}</span>
+                      <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] ${
+                        log.action === 'enter' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {log.action === 'enter' ? '시작' : '종료'}
+                      </span>
                     </p>
+                    <p className="text-[10px] text-gray-400">{formatTime(log.logged_at)}</p>
                   </div>
-                ))
+                </div>
+              ))
             )}
           </div>
         </div>
