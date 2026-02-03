@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
   BookOpen, Brain, Scale, ChevronRight, ChevronLeft,
   Eye, EyeOff, Clock, RotateCcw, Home, LogIn, LogOut,
-  CheckCircle, AlertCircle, Shuffle, Database, Settings, Save, Cloud, CloudOff
+  CheckCircle, AlertCircle, Shuffle, Database, Settings, Save, Cloud, CloudOff, FileText
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -560,13 +560,22 @@ export default function InterviewSimulator() {
                 윤리
               </button>
             </div>
-            <Link
-              href="/interview/admin"
-              className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-violet-600 transition"
-            >
-              <Settings className="w-3 h-3" />
-              관리
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/interview/my-answers"
+                className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-emerald-600 transition"
+              >
+                <FileText className="w-3 h-3" />
+                내 답안
+              </Link>
+              <Link
+                href="/interview/admin"
+                className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-violet-600 transition"
+              >
+                <Settings className="w-3 h-3" />
+                관리
+              </Link>
+            </div>
           </div>
 
           {/* 기출/예상 필터 */}
@@ -740,10 +749,19 @@ export default function InterviewSimulator() {
             {/* 질문 카드 */}
             {currentQuestion && (
               <div className="bg-white rounded-xl border border-gray-200 p-3 mb-3 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-gray-500 font-medium">
-                    질문 {currentQuestionIndex + 1} / {currentCase.questions.length}
-                  </span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 font-medium">
+                      질문 {currentQuestionIndex + 1} / {currentCase.questions.length}
+                    </span>
+                    {/* 현재 질문 답안 작성 여부 */}
+                    {getCurrentAnswer().length > 0 && (
+                      <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-medium flex items-center gap-0.5">
+                        <CheckCircle className="w-3 h-3" />
+                        작성됨
+                      </span>
+                    )}
+                  </div>
                   <div className="flex gap-0.5">
                     <button
                       onClick={prevQuestion}
@@ -760,6 +778,33 @@ export default function InterviewSimulator() {
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
+                </div>
+                {/* 질문별 답안 작성 상태 표시 */}
+                <div className="flex gap-1 mb-3">
+                  {currentCase.questions.map((_, idx) => {
+                    const key = `${currentCase.id}-${idx}`;
+                    const hasAnswer = (userAnswers[key] || '').length > 0;
+                    const isCurrent = idx === currentQuestionIndex;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setCurrentQuestionIndex(idx);
+                          resetViewState();
+                        }}
+                        className={`w-6 h-6 rounded-full text-[10px] font-medium transition flex items-center justify-center ${
+                          isCurrent
+                            ? 'bg-indigo-600 text-white'
+                            : hasAnswer
+                              ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        }`}
+                        title={`질문 ${idx + 1}${hasAnswer ? ' (작성됨)' : ''}`}
+                      >
+                        {hasAnswer && !isCurrent ? '✓' : idx + 1}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <p className="text-gray-800 text-sm font-medium mb-3 leading-relaxed">{currentQuestion.q}</p>
