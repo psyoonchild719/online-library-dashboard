@@ -729,7 +729,7 @@ export default function OnlineLibraryDashboard() {
             <MessageSquare className="w-4 h-4" />
             토론의 방
             {newPostsCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+              <span className="absolute -top-2 -right-2 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm animate-pulse">
                 {newPostsCount}
               </span>
             )}

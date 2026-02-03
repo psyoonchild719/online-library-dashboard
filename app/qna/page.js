@@ -412,7 +412,7 @@ export default function QnAPage() {
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-gray-900 truncate">{q.title}</h3>
                       {isNewPost(q.created_at) && (
-                        <span className="px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded">NEW</span>
+                        <span className="px-2 py-0.5 bg-gradient-to-r from-rose-500 to-orange-400 text-white text-[10px] font-medium rounded-full shadow-sm animate-pulse">NEW</span>
                       )}
                     </div>
                     <p className="text-sm text-gray-500 mt-1 line-clamp-2">{q.content}</p>
