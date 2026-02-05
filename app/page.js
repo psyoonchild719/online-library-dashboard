@@ -807,11 +807,19 @@ export default function OnlineLibraryDashboard() {
         <div className="grid grid-cols-2 gap-2">
           {/* 임상심리전문가 필기 */}
           {(() => {
-            const examDate = new Date('2026-02-06');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const diffTime = examDate.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            // 한국 시간대(KST, UTC+9) 기준으로 계산
+            const now = new Date();
+            const kstOffset = 9 * 60; // KST는 UTC+9
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const kstNow = new Date(utc + (kstOffset * 60000));
+
+            // 오늘 날짜 (KST 기준)
+            const todayKST = new Date(kstNow.getFullYear(), kstNow.getMonth(), kstNow.getDate());
+            // 시험일 (2026-02-06)
+            const examDate = new Date(2026, 1, 6); // month는 0부터 시작
+
+            const diffTime = examDate.getTime() - todayKST.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
             const isToday = diffDays === 0;
             const isPast = diffDays < 0;
 
@@ -842,11 +850,19 @@ export default function OnlineLibraryDashboard() {
 
           {/* 임상심리전문가 면접 */}
           {(() => {
-            const examDate = new Date('2026-02-07');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const diffTime = examDate.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            // 한국 시간대(KST, UTC+9) 기준으로 계산
+            const now = new Date();
+            const kstOffset = 9 * 60; // KST는 UTC+9
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const kstNow = new Date(utc + (kstOffset * 60000));
+
+            // 오늘 날짜 (KST 기준)
+            const todayKST = new Date(kstNow.getFullYear(), kstNow.getMonth(), kstNow.getDate());
+            // 시험일 (2026-02-07)
+            const examDate = new Date(2026, 1, 7); // month는 0부터 시작
+
+            const diffTime = examDate.getTime() - todayKST.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
             const isToday = diffDays === 0;
             const isPast = diffDays < 0;
 
